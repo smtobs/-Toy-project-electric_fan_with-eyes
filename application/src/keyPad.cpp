@@ -1,3 +1,4 @@
+
 #include "../include/smart_home/keyPad.hpp"
 #include <cstring>
 #include <iostream>
@@ -9,23 +10,14 @@
 
 KeyPad::KeyPad()
 {
-    if ((fd = open("/dev/keyPad", O_RDWR)) == -1)
+    if ((fd = open(dev_path, O_RDWR)) == -1)
     {
-        std::cout << "Open /dev/keyPad Failed [" << strerror(errno) << "]" <<  std::endl;
+        std::cout << dev_path << " Open Failed [" << strerror(errno) << "]" <<  std::endl;
     }
-	read(fd, 0, 0);
-    this->test.push_back('1');
-    this->test.push_back('2');
-    this->test.push_back('3');
-    this->test.push_back('4');
-    //this->test.push_back('5');
-    //this->test.push_back('@');
-    this->test.push_back('&');
-    // Key Pad 디바이스 드라이버 오픈
 }
 
 std::vector<char> KeyPad::BuffCpy()
-{   
+{
     std::vector<char> v(this->buff.begin(), this->buff.end());
     return v;
 }
@@ -40,30 +32,25 @@ void KeyPad::BuffCler()
 
 char KeyPad::Scan()
 {
-    if (this->test.empty())
-    {
-        return 0;
-    }
-    else
-    {
-	read(fd, 0, 0);
-        char push_button = this->test.front();
+    char push_button[32] = {0,};
+	read(fd, push_button, sizeof(push_button));
+	std::cout << "buff : " << push_button << std::endl;
 
-        /* Check for Call button and password button */
-        if ((push_button !='@') && (push_button != '&'))
-        {
-            this->buff.push_back(push_button);
-        }
-        this->test.erase(this->test.begin());
-        return push_button;
+    if ((push_button[0] !='A') &&
+        (push_button[0] != 'B') &&
+        (push_button[0] != 'C') &&
+        (push_button[0] != 'D'))
+    {
+        this->buff.push_back(push_button[0]);
     }
-    // key pad 디바이스 드라이버 상태 체크
+    return push_button[0];
 }
 
 KeyPad::~KeyPad()
 {
     // Key Pad 디바이스 드라이버 close
 }
+
 
 
 

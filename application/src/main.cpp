@@ -38,14 +38,14 @@ int main()
     Lcd *lcd = new Lcd();
     SystemManager *sys_mgr = new SystemManager();
     
-    std::thread t1(SendVideo);
+    //std::thread t1(SendVideo);
 
     while (true)
     {
         switch (key_pad->Scan())
         {
             case NULL_DATA:
-		       std::cout << "NULL_DATA \n"; 
+		       //std::cout << "NULL_DATA \n"; 
                 break;
 
             case CALL:
@@ -75,7 +75,7 @@ int main()
                 lcd->Write(key_pad->BuffCpy());
                 break;
         }
-        sleep(1);
+        usleep(100000);
     }
     return 0;
 }
