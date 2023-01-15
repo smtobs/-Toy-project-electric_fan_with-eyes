@@ -1,5 +1,5 @@
 
-#include "../include/smart_home/keyPad.hpp"
+#include "keyPad.hpp"
 #include <cstring>
 #include <iostream>
 #include <fcntl.h>
@@ -32,7 +32,7 @@ void KeyPad::BuffCler()
 
 char KeyPad::Scan()
 {
-    char push_button[32] = {0,};
+    char push_button[4] = {0,};
 	read(fd, push_button, sizeof(push_button));
 	std::cout << "buff : " << push_button << std::endl;
 

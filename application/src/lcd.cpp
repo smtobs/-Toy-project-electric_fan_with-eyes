@@ -1,4 +1,4 @@
-#include "../include/smart_home/lcd.hpp"
+#include "lcd.hpp"
 #include <iostream>
 
 Lcd::Lcd()

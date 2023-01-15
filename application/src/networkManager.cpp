@@ -1,4 +1,4 @@
-#include "../include/smart_home/networkManager.hpp"
+#include "networkManager.hpp"
 
 NetworkManager::NetworkManager()
 {

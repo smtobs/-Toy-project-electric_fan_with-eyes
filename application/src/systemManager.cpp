@@ -1,4 +1,4 @@
-#include "../include/smart_home/systemManager.hpp"
+#include "systemManager.hpp"
 #include <string>
 #include <iostream>
 

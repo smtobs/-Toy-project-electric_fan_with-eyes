@@ -1,9 +1,9 @@
 #include <iostream>
 #include <thread>
 #include "unistd.h"
-#include "../include/smart_home/lcd.hpp"
-#include "../include/smart_home/keyPad.hpp"
-#include "../include/smart_home/systemManager.hpp"
+#include "lcd.hpp"
+#include "keyPad.hpp"
+#include "systemManager.hpp"
 
 #define PASSWORD  '@'
 #define CALL      '&'
