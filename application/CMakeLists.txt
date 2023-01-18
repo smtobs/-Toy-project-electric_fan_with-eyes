@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15.2)
 project(smart_home1)
 
+find_package(OpenSSL REQUIRED)
 include_directories(
     include
     ${CMAKE_CURRENT_SOURCE_DIR}/smart_home
@@ -20,4 +21,6 @@ add_executable(
 
 target_link_libraries(
     ${PROJECT_NAME}
+    OpenSSL::SSL
+    OpenSSL::Crypto
 )
