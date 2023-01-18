@@ -12,9 +12,10 @@ public:
     ~SystemManager();
 
 private:
-    std::vector<char> pw;
+    std::vector<unsigned char> pw;
     int MAX_PW;
     
-    bool GetPw(std::vector<char>&);
+    std::vector<unsigned char> EncryptionPw(char* pw);
+    bool GetPw(std::vector<unsigned char>&);
 };
 #endif

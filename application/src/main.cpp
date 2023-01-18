@@ -34,10 +34,20 @@ void SendVideo()
 
 int main()
 {
+    std::vector<char> test1 = {'1', '2', '3', '4'};
     KeyPad *key_pad = new KeyPad();
     Lcd *lcd = new Lcd();
     SystemManager *sys_mgr = new SystemManager();
     
+    if (sys_mgr->PwCompare(test1))
+    {
+        std::cout << "test OK" << std::endl;
+    }
+    else
+    {
+        std::cout << "test Failed" << std::endl;
+    } 
+    video_mgr->Test();
     //std::thread t1(SendVideo);
 
     while (true)

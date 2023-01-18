@@ -1,5 +1,5 @@
-#ifndef keyPad_h
-#define keyPad_h
+#ifndef KEYPAD_H
+#define KEYPAD_H
 #include <vector>
 
 class KeyPad
