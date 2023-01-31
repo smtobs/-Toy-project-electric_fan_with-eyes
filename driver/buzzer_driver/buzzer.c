@@ -8,12 +8,12 @@
 #define FREQ_2KHZ        2000
 #define FREQ_3KHZ        3000
 
-void OnBuzzerSound(buzzer_obj_t *this);
-void RemoveBuzzerObj(buzzer_obj_t *this);
+static void OnBuzzerSound(buzzer_obj_t *this);
+static void RemoveBuzzerObj(buzzer_obj_t *this);
 
-bool CreateBuzzerObj(buzzer_obj_t *this)
+_Bool CreateBuzzerObj(struct buzzer_obj_t *this)
 {    
-     /* Create Pwm Obj */
+     /* Create PWM Obj */
      if (CreatePwmObj(&this->pwm, BUZZER_PWM_DEV, BUZZER_LABEL) == false)
      {
         printk("Error CreatePwmObj !\n");
@@ -27,27 +27,27 @@ bool CreateBuzzerObj(buzzer_obj_t *this)
      return true;
 }
 
-void OnBuzzerSound(buzzer_obj_t *this)
+static void OnBuzzerSound(buzzer_obj_t *this)
 {
-    pwm_obj_t *p_pwm = this->pwm;
+    pwm_obj_t *p_pwm = &this->pwm;
 
     p_pwm->StartFunc(p_pwm);
 
     p_pwm->GenFreqFunc(p_pwm, FREQ_1KHZ);
-	DELAY_MS(100);
+    U_DELAY_MS(100);
 
     p_pwm->GenFreqFunc(p_pwm, FREQ_2KHZ);
-	DELAY_MS(100);
+    U_DELAY_MS(100);
 
     p_pwm->GenFreqFunc(p_pwm, FREQ_3KHZ);
-	DELAY_MS(100);
-
-	buzzerStoptFreq();
+    U_DELAY_MS(100);
+    
+    p_pwm->StoptFunc(p_pwm);
 }
 
-void RemoveBuzzerObj(buzzer_obj_t *this)
+static void RemoveBuzzerObj(buzzer_obj_t *this)
 {
-    pwm_obj_t *p_pwm = this->pwm;
+    pwm_obj_t *p_pwm = &this->pwm;
 
     p_pwm->RemoveObjFunc(p_pwm);
 
