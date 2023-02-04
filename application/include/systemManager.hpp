@@ -1,9 +1,12 @@
 #ifndef SYS_MANAGER_H
 #define SYS_MANAGER_H
 
+#include "utils.hpp"
 #include <vector>
 
-class SystemManager
+//template<typename T>
+class Utils;
+class SystemManager : public Utils
 {
 public:
     SystemManager();

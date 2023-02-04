@@ -47,7 +47,7 @@ int main()
     {
         std::cout << "test Failed" << std::endl;
     } 
-    video_mgr->Test();
+    //video_mgr->Test();
     //std::thread t1(SendVideo);
 
     while (true)

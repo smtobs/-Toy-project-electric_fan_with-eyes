@@ -4,20 +4,6 @@
 #include <openssl/sha.h>
 #include <cstring>
 
-/* 코드 옮겨야 함 */
-template<typename T>
-bool IsEqual(std::vector<T> const &v1, std::vector<T> const &v2)
-{
-    std::cout << "v1:size : " << v1.size() << std::endl;
-    std::cout << "v2:size : " << v2.size() << std::endl;
-
-    std::cout << "v1:data : " << v1.data() << std::endl;
-    std::cout << "v2:data : " << v2.data() << std::endl;
-
-    return (v1.size() == v2.size() &&
-            std::equal(v1.begin(), v1.end(), v2.begin()));
-}
-
 SystemManager::SystemManager()
 {
     MAX_PW = 128;
@@ -31,7 +17,7 @@ bool SystemManager::FindUnitNumber(std::vector<char> input_unit_num)
     get_unit_num.push_back('2');
     get_unit_num.push_back('3');
     get_unit_num.push_back('4');
-    if (IsEqual(get_unit_num, input_unit_num))
+    if (this->IsEqual(get_unit_num, input_unit_num))
     {
         return true;
     }

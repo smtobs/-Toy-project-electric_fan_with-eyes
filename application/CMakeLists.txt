@@ -17,7 +17,8 @@ add_executable(
     src/main.cpp
     src/lcd.cpp
     src/keyPad.cpp
-    src/systemManager.cpp)
+    src/systemManager.cpp
+    src/utils.cpp)
 
 target_link_libraries(
     ${PROJECT_NAME}

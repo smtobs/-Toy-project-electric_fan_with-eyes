@@ -10,9 +10,14 @@
 
 KeyPad::KeyPad()
 {
-    if ((fd = open(dev_path, O_RDWR)) == -1)
+    if (access(this->dev_path, F_OK) != 0)
     {
-        std::cout << dev_path << " Open Failed [" << strerror(errno) << "]" <<  std::endl;
+        
+    }
+
+    if ((this->fd = open(this->dev_path, O_RDWR)) < 0)
+    {
+        std::cout << this->dev_path << " Open Failed [" << strerror(errno) << "]" <<  std::endl;
     }
 }
 
@@ -49,6 +54,7 @@ char KeyPad::Scan()
 KeyPad::~KeyPad()
 {
     // Key Pad 디바이스 드라이버 close
+    close(this->fd);
 }
 
 
