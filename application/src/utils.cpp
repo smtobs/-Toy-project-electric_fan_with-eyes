@@ -1,16 +1,10 @@
 #include "utils.hpp"
 #include <vector>
-//#include "spdlog/spdlog.h"
+
 #include <iostream>
 
 Utils::Utils()
 {
-    std::cout << "v1:size : " << std::endl;
-}
-
-void Utils::test()
-{
-    std::cout << "v1:size : " << std::endl;
 }
 
 bool Utils::IsEqual(std::vector<char> const &v1, std::vector<char> const &v2)

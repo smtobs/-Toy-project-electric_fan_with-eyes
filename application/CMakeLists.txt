@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.15.2)
 project(smart_home1)
 
 find_package(OpenSSL REQUIRED)
+find_package(spdlog REQUIRED)
+
+link_directories("libs")
+
 include_directories(
     include
     ${CMAKE_CURRENT_SOURCE_DIR}/smart_home
@@ -18,10 +22,12 @@ add_executable(
     src/lcd.cpp
     src/keyPad.cpp
     src/systemManager.cpp
-    src/utils.cpp)
+    src/utils.cpp
+    src/log.cpp)
 
 target_link_libraries(
     ${PROJECT_NAME}
     OpenSSL::SSL
     OpenSSL::Crypto
+    spdlog::spdlog
 )
