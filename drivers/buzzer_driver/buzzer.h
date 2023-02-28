@@ -6,7 +6,9 @@ typedef struct buzzer_obj_t
 {
      pwm_obj_t pwm;
      int major_num;
-     void (*OnSoundFunc)(struct buzzer_obj_t *this);
+     _Bool instance;
+     void (*SuccessSoundFunc)(struct buzzer_obj_t *this);
+     void (*ButtonPushSoundFunc)(struct buzzer_obj_t *this);
      void (*RemoveObjFunc)(struct buzzer_obj_t *this);
 }buzzer_obj_t;
 

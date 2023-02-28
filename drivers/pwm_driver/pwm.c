@@ -7,7 +7,7 @@
 
 static void StartPwm(pwm_obj_t *);
 static void StopPwm(pwm_obj_t *);
-static void GenFreq(pwm_obj_t *, uint16_t);
+static void GenFreq(pwm_obj_t *, uint16_t, uint16_t);
 static void RemovePwmObj(pwm_obj_t *);
 
 typedef struct pwm_private_t
@@ -22,8 +22,8 @@ _Bool CreatePwmObj(struct pwm_obj_t *this,  int pwm, const char *label)
      this->private->instance = pwm_request(pwm, label);
      if (!(this->private->instance))
      {
-        // Todo
-        return false;
+          printk("PWM request failed !");
+          return false;
      }
 
      /* Register PWM Function */
@@ -57,12 +57,12 @@ static void StopPwm(pwm_obj_t *this)
      pwm_disable(this->private->instance);
 }
 
-static void GenFreq(pwm_obj_t *this, uint16_t freq)
+static void GenFreq(pwm_obj_t *this, uint16_t ratio, uint16_t freq)
 {
-     uint16_t duty, period;
-    
-     period = (1000000000 / freq) - 1; 
-     duty = period / 2;
+     uint32_t period, duty;
+
+     period = 1000000000 / freq;
+     duty   = (ratio * period) / 100;
 
      pwm_config(this->private->instance, duty, period);
 }

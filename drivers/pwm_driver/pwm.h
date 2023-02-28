@@ -8,7 +8,7 @@ typedef struct pwm_obj_t
      struct pwm_private_t *private;
      void (*StartFunc)(struct pwm_obj_t *this);
      void (*StoptFunc)(struct pwm_obj_t *this);
-     void (*GenFreqFunc)(struct pwm_obj_t *this, unsigned short freq);
+     void (*GenFreqFunc)(struct pwm_obj_t *this, unsigned short ratio, unsigned short freq);
      void (*RemoveObjFunc)(struct pwm_obj_t *this);
 }pwm_obj_t;
 

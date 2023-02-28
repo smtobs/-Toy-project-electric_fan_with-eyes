@@ -7,13 +7,22 @@
 #include <linux/string.h>
 #include <asm/uaccess.h>
 #include <linux/slab.h>
+#include <asm/io.h>
 #include "buzzer.h"
 
-#define DEVICE_MAJOR_NUM       251
-#define DEV_NAME               "/dev/buzzer"
+#define DEVICE_MAJOR_NUM                    0
+#define DEV_NAME                            "/dev/buzzer"
+
+#define IOCTL_BUZZER_MAGIC                  'b'
+#define SUCCESS_SOUND_BUZZER                0
+#define BUTTON_PUSH_SOUND_BUZZER            1
+
+#define IOCTL_CMD_SUCCESS_SOUND_BUZZER      _IO(IOCTL_BUZZER_MAGIC, SUCCESS_SOUND_BUZZER)
+#define IOCTL_CMD_BUTTON_PUSH_SOUND_BUZZER  _IO(IOCTL_BUZZER_MAGIC, BUTTON_PUSH_SOUND_BUZZER)
 
 static int OpenBuzzerModule(struct inode *inode, struct file *filp);
-static ssize_t WriteBuzzerModule(struct file *filp, const char __user *buf, size_t len, loff_t *f_pos);
+static int ReleaseBuzzerModule(struct inode *inode, struct file *filp);
+static long IoctlBuzzerModule(struct file *filp, unsigned int cmd, unsigned long arg);
 static int InitBuzzerModule(void);
 static void ExitBuzzerModule(void);
 
@@ -21,44 +30,57 @@ static buzzer_obj_t buzzer_mgr;
 
 struct file_operations buzzer_fops =
 {
-    .owner = THIS_MODULE,
-    .open  = OpenBuzzerModule,
-    .write = WriteBuzzerModule,
+    .owner   = THIS_MODULE,
+    .open    = OpenBuzzerModule,
+    .release = ReleaseBuzzerModule,
+    .unlocked_ioctl = IoctlBuzzerModule,
 };
 
 static int OpenBuzzerModule(struct inode *inode, struct file *filp)
-{
-    printk("Simple device driver programming: oepn virtual device !!!\n");
-
+{ 
     /* Create Buzzer Obj */
     if (CreateBuzzerObj(&buzzer_mgr) == false)
     {
-         /* Todo */
-         return -1;
+        printk("Failed to create buzzer object.");
+        return -1;
+    }
+    
+    buzzer_mgr.instance = true;
+
+    return 0;
+}
+
+static int ReleaseBuzzerModule(struct inode *inode, struct file *filp)
+{
+    if (buzzer_mgr.instance == true)
+    {
+        buzzer_mgr.RemoveObjFunc(&buzzer_mgr);
     }
     return 0;
 }
 
-static ssize_t WriteBuzzerModule(struct file *filp, const char __user *buf, size_t len, loff_t *f_pos)
+static long IoctlBuzzerModule(struct file *filp, unsigned int cmd, unsigned long arg)
 {
-#if (0)
-    if (buzzer_mgr == NULL)
+    if (_IOC_TYPE(cmd) != IOCTL_BUZZER_MAGIC)
     {
-         
+        return -EINVAL;
     }
 
-    switch ()
+    switch (cmd)
     {
-        case :
-             break;
-        default :
-             break;
-    }
-#endif
-    buzzer_mgr.OnSoundFunc(&buzzer_mgr);
+        case IOCTL_CMD_SUCCESS_SOUND_BUZZER :
+            buzzer_mgr.SuccessSoundFunc(&buzzer_mgr);
+            break;
 
-    printk("Simple device driver programming: oepn virtual device !!!\n");
-    return len;
+        case IOCTL_CMD_BUTTON_PUSH_SOUND_BUZZER :
+            buzzer_mgr.ButtonPushSoundFunc(&buzzer_mgr);
+            break;
+
+        default:
+            break;
+    }
+
+    return 0;
 }
 
 static int InitBuzzerModule(void)
@@ -69,7 +91,7 @@ static int InitBuzzerModule(void)
     {
         printk(KERN_WARNING"%s: can't get or assign major number %d\n",
         DEV_NAME,
-        DEVICE_MAJOR_NUM);
+        buzzer_mgr.major_num);
         return buzzer_mgr.major_num;
     }
 
@@ -79,10 +101,12 @@ static int InitBuzzerModule(void)
 
 static void ExitBuzzerModule(void)
 {
-    int num = buzzer_mgr.major_num;
-    buzzer_mgr.RemoveObjFunc(&buzzer_mgr);
+    if (buzzer_mgr.instance == true)
+    {
+        buzzer_mgr.RemoveObjFunc(&buzzer_mgr);
+    }
 
-    unregister_chrdev(num, DEV_NAME);
+    unregister_chrdev(buzzer_mgr.major_num, DEV_NAME);
     printk("Success to unload the device %s...\n", DEV_NAME);
 }
 
