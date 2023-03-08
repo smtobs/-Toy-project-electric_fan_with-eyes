@@ -1,5 +1,4 @@
 #include "buzzer.h"
-#include "util.h"
 
 #define BUZZER_PWM_DEV   0
 #define BUZZER_LABEL     "buzzer_pwm0"
@@ -8,7 +7,7 @@ static void SuccessSound(buzzer_obj_t *this);
 static void ButtonPushSound(buzzer_obj_t *this);
 static void RemoveBuzzerObj(buzzer_obj_t *this);
 
-_Bool CreateBuzzerObj(struct buzzer_obj_t *this)
+bool CreateBuzzerObj(struct buzzer_obj_t *this)
 {    
     if (this->instance == true)
     {
