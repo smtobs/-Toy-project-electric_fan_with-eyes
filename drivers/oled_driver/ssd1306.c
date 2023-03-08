@@ -1,11 +1,9 @@
 #include "custom_gpio.h"
 #include "custom_spi.h"
 #include "ssd1306.h"
-#include <linux/types.h>
-//#include "util.h"
 
-gpio_obj_t gpio;
-spi_obj_t spi;
+static gpio_obj_t gpio;
+static spi_obj_t spi;
 
 /*
 ** Variable to store Line Number and Cursor Position.
@@ -17,7 +15,7 @@ static uint8_t SSD1306_FontSize  = SSD1306_DEF_FONT_SIZE;
 /*
 ** Array Variable to store the letters.
 */ 
-static const unsigned char SSD1306_font[][SSD1306_DEF_FONT_SIZE]= 
+static const unsigned char SSD1306_font[][SSD1306_DEF_FONT_SIZE] = 
 {
     {0x00, 0x00, 0x00, 0x00, 0x00},   // space
     {0x00, 0x00, 0x2f, 0x00, 0x00},   // !
@@ -142,16 +140,15 @@ bool CreateSSD1306Obj(struct ssd1306_obj_t *oled)
 
     if (CreateGpioObj(&gpio) == false)
     {
-        //Todo
-	printk("error gpio obj\n");
-        return -1;
+        printk("Failed to create Gpio object\n");
+        return false;
     }
 
 
     if ((CreateSpiObj(&spi, "etx-spi-ssd1306-driver", MAX_SPEED_HZ, SPI_BUS_NUM, 0, SPI_MODE0)) == false)
     {
-       	printk("error spi boj\n");
-        return -1;
+       	printk("Failed to create SPI object\n");
+        return false;
     }
 
     /* Register for GPIO Function */
@@ -175,7 +172,7 @@ static void FillSSD1306(uint8_t data)
     unsigned int i      = 0;
 
     //Fill the Display
-    for(i = 0; i < total; i++)
+    for (i = 0; i < total; i++)
     {
         WriteSSD1306(false, data);
     }
@@ -185,15 +182,15 @@ static int DisplayInitSSD1306(void)
 {
     if (gpio.Init(SSD1306_RST_PIN, GPIO_OUTPUT, GPIO_HIGH, "SSD1306_RST_PIN") == false)
     {
-	printk("error ssd1306 RST PIN\n");
-	return -1;
+        printk("SSD1306 RST Gpio initialization failed\n");
+        return -1;
     }
 
     if (gpio.Init(SSD1306_DC_PIN, GPIO_OUTPUT, GPIO_HIGH, "SSD1306_DC_PIN") == false)
     {
         gpio.DeInit(SSD1306_RST_PIN);
-	printk("error ssd1306 DC PIN\n");
-	return -1;
+        printk("SSD1306 DC Gpio initialization failed\n");
+        return -1;
     }
 
     gpio.Write(SSD1306_RST_PIN, 0u);
@@ -343,8 +340,7 @@ static int InitSSD1306(struct ssd1306_obj_t *ssd1306)
 {
     if (spi.Init(&spi) == false)
     {
-        // Todo
-	printk("spi init error");
+        printk("Spi initialization failed");
         return -1;
     }
 
@@ -353,20 +349,7 @@ static int InitSSD1306(struct ssd1306_obj_t *ssd1306)
 
     /* Print the String */
     ssd1306->SetBrightnessFunc(255);
-    ssd1306->InvertDisplayFunc(false);        
-
-    /* Enable the Horizontal scroll for first 3 lines */
-    ssd1306->StartScrollHorizontalFunc(true, 0, 2);
-
-    ssd1306->WriteStringFunc("Welcome\nTo\nET-E9\n", 0, 0);
-    ssd1306->WriteStringFunc("SPI Linux\n", 4, 35);
-    ssd1306->WriteStringFunc("Device Driver\n", 5, 23);
-    ssd1306->WriteStringFunc("Project\n", 6, 37);
-
-    U_DELAY_MS(11000);                      
-
-    ssd1306->ClearDisplayFunc();
-    ssd1306->DeactivateScrollFunc();
+    ssd1306->InvertDisplayFunc(false);
 
     return 0;
 }
@@ -420,12 +403,12 @@ static void StartScrollHorizontalSSD1306( bool is_left_scroll,
 {
     if (is_left_scroll)
     {
-        // left horizontal scroll
+        /* left horizontal scroll */
         WriteSSD1306(true, 0x27);
     }
     else
     {
-        // right horizontal scroll 
+        /* right horizontal scroll */ 
         WriteSSD1306(true, 0x26);
     }
 
