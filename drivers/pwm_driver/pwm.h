@@ -12,5 +12,5 @@ typedef struct pwm_obj_t
      void (*RemoveObjFunc)(struct pwm_obj_t *this);
 }pwm_obj_t;
 
-_Bool CreatePwmObj(struct pwm_obj_t *this,  int pwm, const char *label);
+bool CreatePwmObj(struct pwm_obj_t *this,  int pwm, const char *label);
 #endif

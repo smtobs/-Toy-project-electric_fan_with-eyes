@@ -17,7 +17,7 @@ bool CreateGpioObj(struct gpio_obj_t *gpio)
     return true;
 }
 
-static _Bool InitGpio(uint8_t gpio_number, uint8_t io, uint8_t gpio_state, const char *label)
+static bool InitGpio(uint8_t gpio_number, uint8_t io, uint8_t gpio_state, const char *label)
 {
     if (gpio_is_valid(gpio_number) == false)
     {

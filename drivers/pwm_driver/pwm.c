@@ -15,22 +15,22 @@ typedef struct pwm_private_t
     struct pwm_device *instance;
 }pwm_private_t;
 
-_Bool CreatePwmObj(struct pwm_obj_t *this,  int pwm, const char *label)
+bool CreatePwmObj(struct pwm_obj_t *pwm,  int pwm, const char *label)
 {
-     this->private = U_MALLOC(sizeof(pwm_private_t));
+     pwm->private = U_MALLOC(sizeof(pwm_private_t));
      
-     this->private->instance = pwm_request(pwm, label);
-     if (!(this->private->instance))
+     pwm->private->instance = pwm_request(pwm, label);
+     if (!(pwm->private->instance))
      {
           printk("PWM request failed !");
           return false;
      }
 
-     /* Register PWM Function */
-     this->StartFunc     = StartPwm;
-     this->StoptFunc     = StopPwm;
-     this->GenFreqFunc   = GenFreq;
-     this->RemoveObjFunc = RemovePwmObj;
+     /* Register for PWM Function */
+     pwm->StartFunc     = StartPwm;
+     pwm->StoptFunc     = StopPwm;
+     pwm->GenFreqFunc   = GenFreq;
+     pwm->RemoveObjFunc = RemovePwmObj;
 
      return true;
 }
