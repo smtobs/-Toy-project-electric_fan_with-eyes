@@ -1,3 +1,4 @@
+#include <linux/types.h>
 #include <linux/delay.h>
 #include <linux/kernel.h>
 #include <linux/slab.h>
