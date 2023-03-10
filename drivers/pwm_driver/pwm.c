@@ -1,9 +1,6 @@
 #include "pwm.h"
-#include "util.h"
 #include <linux/pwm.h>
 #include <linux/kernel.h>
-#include <linux/slab.h>
-#include <linux/vmalloc.h>
 
 static void StartPwm(pwm_obj_t *);
 static void StopPwm(pwm_obj_t *);
@@ -15,22 +12,22 @@ typedef struct pwm_private_t
     struct pwm_device *instance;
 }pwm_private_t;
 
-bool CreatePwmObj(struct pwm_obj_t *pwm,  int pwm, const char *label)
+bool CreatePwmObj(struct pwm_obj_t *this,  int pwm, const char *label)
 {
-     pwm->private = U_MALLOC(sizeof(pwm_private_t));
+     this->private = U_MALLOC(sizeof(pwm_private_t));
      
-     pwm->private->instance = pwm_request(pwm, label);
-     if (!(pwm->private->instance))
+     this->private->instance = pwm_request(pwm, label);
+     if (!(this->private->instance))
      {
           printk("PWM request failed !");
           return false;
      }
 
      /* Register for PWM Function */
-     pwm->StartFunc     = StartPwm;
-     pwm->StoptFunc     = StopPwm;
-     pwm->GenFreqFunc   = GenFreq;
-     pwm->RemoveObjFunc = RemovePwmObj;
+     this->StartFunc     = StartPwm;
+     this->StoptFunc     = StopPwm;
+     this->GenFreqFunc   = GenFreq;
+     this->RemoveObjFunc = RemovePwmObj;
 
      return true;
 }

@@ -1,6 +1,8 @@
 #ifndef _PWM_H_
 #define _PWM_H_
 
+#include "util.h"
+
 struct pwm_private_t;
 
 typedef struct pwm_obj_t
