@@ -12,6 +12,7 @@ public:
     SystemManager();
     bool PwCompare(std::vector<char>);
     bool FindUnitNumber(std::vector<char>);
+    char* GetLocalTime(void);
     ~SystemManager();
 
 private:

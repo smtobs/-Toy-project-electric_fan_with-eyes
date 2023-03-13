@@ -43,7 +43,7 @@ bool SystemManager::PwCompare(std::vector<char> input_pw)
 
 bool SystemManager::GetPw(std::vector<unsigned char>& sys_pw)
 {
-    unsigned char t[] = "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f";
+    unsigned char t[] = "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f"; // 1 2 3 4
     sys_pw.insert(sys_pw.begin(), std::begin(t), std::end(t));
 
     return true;
@@ -67,6 +67,21 @@ std::vector<unsigned char> SystemManager::EncryptionPw(char* pw)
     }
     std::vector<unsigned char> encryption_pw(hashTransform, hashTransform + strlen((const char *)hashTransform) + 1);
     return encryption_pw;
+}
+
+char* SystemManager::GetLocalTime(void)
+{
+    struct tm tm;
+    time_t ct;
+
+    ct = time(NULL);
+    tm = *localtime(&ct);
+
+    static char cur_time[32];
+    memset(cur_time, 0x0, sizeof(cur_time));
+    snprintf(cur_time, sizeof(cur_time), "%d-%d-%d %d:%d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min);
+
+    return cur_time;
 }
 
 SystemManager::~SystemManager()
