@@ -8,7 +8,8 @@
 #include "ssd1306.h"
 #include "util.h"
 #include "logo.h"
-#include "ioctl_oled.h"
+#include "../lib/ioctl/ioctl_oled.h"
+//#include "ioctl_oled.h"
 
 #define DEVICE_MAJOR_NUM                    0
 #define DEV_NAME                            "/dev/oled"
@@ -60,13 +61,11 @@ static long IoctlOledModule(struct file *filp, unsigned int cmd, unsigned long a
     {
         case IOCTL_OLED_DISPLAY_WRITE :
             ioctl_oled = (ioctl_oled_t *)arg;
-
-            printk("str : [%s]\n", ioctl_oled->str);
-            printk("line_no : [%u]\n", ioctl_oled->line_no);
-            printk("cusur : [%u]\n", ioctl_oled->cursor_pos);
+            oled.WriteStringFunc(ioctl_oled->str, ioctl_oled->line_no, ioctl_oled->cursor_pos);
             break;
 
-        case IOCTL_OLED_TEST :
+        case IOCTL_OLED_CLEAR :
+            oled.ClearDisplayFunc();
             break;
 
         default:
@@ -78,7 +77,6 @@ static long IoctlOledModule(struct file *filp, unsigned int cmd, unsigned long a
 
 static int __init InitModuleOled(void)
 {
-
     /* Register for Module */
     g_major_num = register_chrdev(DEVICE_MAJOR_NUM, DEV_NAME, &oled_fops);
     if (g_major_num  < 0)
@@ -89,30 +87,17 @@ static int __init InitModuleOled(void)
         return g_major_num;
     }
 
-    printk("init OLED moudle !\n");
-
     if (CreateSSD1306Obj(&oled) == false)
     {
         printk("error SSD1306 obj");
         return -1;
     }
 
-    printk("init.............");
     oled.InitFunc(&oled);
-
     oled.PrintLogoFunc(g_oled_boot_logo);
     U_DELAY_MS(5000);
 
-    oled.ClearDisplayFunc();
-    oled.DeactivateScrollFunc();
-
-    /* Enable the Horizontal scroll for first 3 lines */
-    oled.StartScrollHorizontalFunc(true, 0, 2);
-
-    oled.WriteStringFunc("Welcome\nTo\nET-E9\n", 0, 0);
-    oled.WriteStringFunc("SPI Linux\n", 4, 35);
-    oled.WriteStringFunc("Device Driver\n", 5, 23);
-    oled.WriteStringFunc("Project\n", 6, 37);
+    printk("OLED Driver major num : [%s] [%d]: \n", DEV_NAME, g_major_num);
 
     return 0;
 }

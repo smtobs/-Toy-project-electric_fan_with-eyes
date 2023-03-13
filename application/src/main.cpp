@@ -1,91 +1,98 @@
 #include <iostream>
 #include <thread>
 #include "unistd.h"
-#include "lcd.hpp"
+#include "oled.hpp"
 #include "keyPad.hpp"
 #include "systemManager.hpp"
+#include "buzzer.hpp"
 
-#define PASSWORD  '@'
-#define CALL      '&'
-#define NULL_DATA 0
+#define PASSWORD       'A'
+#define CALL           'B'
+#define CLEAR          'C'
+#define NULL_DATA      0
 
 bool is_video_event;
-
-void SendVideo()
-{
-    uint8_t time_out = 0;
-    for (;;)
-    {
-        if (is_video_event)
-        {
-            if (++time_out < 60)
-            {
-                std::cout << "비디오 이미지 전송중! \n";
-            }
-            else
-            {
-                is_video_event = false;
-                time_out = 0;
-            }
-        }
-        sleep(1);
-	}
-}
 
 int main()
 {
     std::vector<char> test1 = {'1', '2', '3', '4'};
-    KeyPad *key_pad = new KeyPad();
-    Lcd *lcd = new Lcd();
+    Buzzer* buzzer = new Buzzer();
+    KeyPad* key_pad = new KeyPad();
+    Oled* oled = new Oled();
     SystemManager *sys_mgr = new SystemManager();
+
+    oled->ClearDisplay();
+    oled->WriteDisplay("Please enter your\n", 2, 17);
+    oled->WriteDisplay("password.\n", 3, 40);
+
+    uint8_t curs_pos_count = 0;
+
+    oled->WriteDisplay(sys_mgr->GetLocalTime(), 0, 0);
     
-    if (sys_mgr->PwCompare(test1))
-    {
-        std::cout << "test OK" << std::endl;
-    }
-    else
-    {
-        std::cout << "test Failed" << std::endl;
-    } 
-    //video_mgr->Test();
-    //std::thread t1(SendVideo);
+    char keypad_data[2] = {0, };
 
     while (true)
     {
-        switch (key_pad->Scan())
+        keypad_data[0] = key_pad->Scan();
+        switch (keypad_data[0])
         {
             case NULL_DATA:
-		       //std::cout << "NULL_DATA \n"; 
                 break;
 
             case CALL:
+#if (0)
                 if (sys_mgr->FindUnitNumber(key_pad->BuffCpy()))
                 {
                     std::cout << "비디오 이미지 전송!!\n";
-                    lcd->Write("세대호출 중..");
+                    oled->WriteDisplay("세대호출 중..");
                     is_video_event = true;
                 }
                 else
                 {
-                    lcd->Write("세대호출 실패..");
+                    oled->WriteDisplay("세대호출 실패..");
                 }
+#endif
                 key_pad->BuffCler();
                 break;
 
             case PASSWORD:
-                /* 패스워드 비교 로직 */
                 if (sys_mgr->PwCompare(key_pad->BuffCpy()))
                 {
-                    std::cout << "doorOpen !!\n";
+                    oled->ClearDisplay();                 
+                    oled->WriteDisplay("Correct Password.\n", 3, 14);
+                    oled->WriteDisplay("The door opens.\n", 4, 20);
+                    buzzer->SuccessSound();
                 }
                 break;
-                
-             /* Write data to LCD */
-            default:		
-                lcd->Write(key_pad->BuffCpy());
+
+            case CLEAR:
+                oled->ClearDisplay();
+                key_pad->BuffCler();
+                oled->WriteDisplay("Please enter your\n", 2, 17);
+                oled->WriteDisplay("password.\n", 3, 40);
+                buzzer->ButtonPushSound();
+                break;
+
+            default: /* Write data to LCD */
+                if (curs_pos_count < 5)
+                {
+                    if (curs_pos_count == 0)
+                    {
+                        oled->WriteDisplay(keypad_data, 5, 45 + (curs_pos_count * 8));
+                    }
+                    else
+                    {
+                        oled->WriteDisplay("*", 5, 45 + ((curs_pos_count - 1) * 8));
+                        oled->WriteDisplay(keypad_data, 5, 45 + (curs_pos_count * 8));
+                    }
+                    curs_pos_count++;
+
+                    buzzer->ButtonPushSound();
+                }
                 break;
         }
-        usleep(100000);
+        oled->WriteDisplay(sys_mgr->GetLocalTime(), 0, 0);
+        usleep(1000);
     }
     return 0;
 }

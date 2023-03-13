@@ -39,6 +39,11 @@ char KeyPad::Scan()
 {
     char push_button[2] = {0,};
 	read(fd, push_button, sizeof(push_button));
+    if (push_button[0] == '\0')
+    {
+        return '\0';
+    }
+    
 	std::cout << "buff : " << push_button << std::endl;
 
     if ((push_button[0] !='A') &&
@@ -53,8 +58,10 @@ char KeyPad::Scan()
 
 KeyPad::~KeyPad()
 {
-    // Key Pad 디바이스 드라이버 close
-    close(this->fd);
+    if (this->fd)
+    {
+        close(this->fd);
+    }
 }
 
 
