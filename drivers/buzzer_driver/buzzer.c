@@ -26,6 +26,7 @@ bool CreateBuzzerObj(struct buzzer_obj_t *this)
      this->ButtonPushSoundFunc  = ButtonPushSound;
      this->RemoveObjFunc        = RemoveBuzzerObj;
 
+    this->instance = true;
      return true;
 }
 

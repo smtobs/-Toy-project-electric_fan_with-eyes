@@ -8,17 +8,12 @@
 #include <asm/uaccess.h>
 #include <linux/slab.h>
 #include <asm/io.h>
+
+#include "../lib/ioctl/ioctl_buzzer.h"
 #include "buzzer.h"
 
 #define DEVICE_MAJOR_NUM                    0
 #define DEV_NAME                            "/dev/buzzer"
-
-#define IOCTL_BUZZER_MAGIC                  'b'
-#define SUCCESS_SOUND_BUZZER                0
-#define BUTTON_PUSH_SOUND_BUZZER            1
-
-#define IOCTL_CMD_SUCCESS_SOUND_BUZZER      _IO(IOCTL_BUZZER_MAGIC, SUCCESS_SOUND_BUZZER)
-#define IOCTL_CMD_BUTTON_PUSH_SOUND_BUZZER  _IO(IOCTL_BUZZER_MAGIC, BUTTON_PUSH_SOUND_BUZZER)
 
 static int OpenBuzzerModule(struct inode *inode, struct file *filp);
 static int ReleaseBuzzerModule(struct inode *inode, struct file *filp);
@@ -44,8 +39,6 @@ static int OpenBuzzerModule(struct inode *inode, struct file *filp)
         printk("Failed to create buzzer object.");
         return -1;
     }
-    
-    buzzer_mgr.instance = true;
 
     return 0;
 }
