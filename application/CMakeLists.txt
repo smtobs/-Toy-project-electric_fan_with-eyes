@@ -3,12 +3,15 @@ project(smart_home1)
 
 find_package(OpenSSL REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(PahoMqttCpp REQUIRED)
 
 link_directories("libs")
 
 include_directories(
     include
+    ../lib/ioctl
     ${CMAKE_CURRENT_SOURCE_DIR}/smart_home
+    ${PAHO_MQTT_CPP_INCLUDE_DIRS}
 )
 
 set(CMAKE_CXX_COMPILER g++)
@@ -23,6 +26,8 @@ add_executable(
     src/keyPad.cpp
     src/systemManager.cpp
     src/buzzer.cpp
+    src/mqtt_callback.cpp
+    src/mqtt_iface.cpp
     src/utils.cpp
     src/log.cpp)
 
@@ -31,4 +36,5 @@ target_link_libraries(
     OpenSSL::SSL
     OpenSSL::Crypto
     spdlog::spdlog
+    PahoMqttCpp::paho-mqttpp3
 )

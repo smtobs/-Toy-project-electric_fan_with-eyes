@@ -5,21 +5,27 @@
 #include "keyPad.hpp"
 #include "systemManager.hpp"
 #include "buzzer.hpp"
+#include "mqtt_iface.hpp"
 
 #define PASSWORD       'A'
 #define CALL           'B'
 #define CLEAR          'C'
 #define NULL_DATA      0
 
-bool is_video_event;
-
 int main()
 {
-    std::vector<char> test1 = {'1', '2', '3', '4'};
-    Buzzer* buzzer = new Buzzer();
-    KeyPad* key_pad = new KeyPad();
-    Oled* oled = new Oled();
-    SystemManager *sys_mgr = new SystemManager();
+    Buzzer* buzzer         = new Buzzer();
+    KeyPad* key_pad        = new KeyPad();
+    Oled* oled             = new Oled();
+    SystemManager* sys_mgr = new SystemManager();
+    MqttIface* mqtt_iface  = new MqttIface();
+
+    do
+    {
+        usleep(1000);
+    } while (mqtt_iface->ConnectBroker() != true);
+
+    mqtt_iface->Publish("/pub/smart/humidifier", "Hi~~~~");
 
     oled->ClearDisplay();
     oled->WriteDisplay("Please enter your\n", 2, 17);
