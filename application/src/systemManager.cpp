@@ -93,8 +93,8 @@ uint64_t SystemManager::GetTick(void)
     {
     	std::cout << "clock_gettime error "  << std::endl;
     }
-	uint64_t time_ms = time_probe.tv_nsec / 1000000UL;
-	time_ms = time_ms + (time_probe.tv_sec * 1000);
+    uint64_t time_ms = time_probe.tv_nsec / 1000000UL;
+    time_ms = time_ms + (time_probe.tv_sec * 1000);
 	
     return time_ms;
 }
@@ -105,7 +105,7 @@ bool SystemManager::IsTimeDiff(unsigned long now, unsigned long prev, unsigned l
 
     if (now > prev)
     {
-    return ((now - prev) >= goal);
+        return ((now - prev) >= goal);
     }
     else
     {
