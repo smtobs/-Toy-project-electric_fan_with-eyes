@@ -1,6 +1,7 @@
 #ifndef KEYPAD_H
 #define KEYPAD_H
 #include <vector>
+#include <mutex>
 
 class KeyPad
 {
@@ -12,6 +13,7 @@ public:
     ~KeyPad();
 
 private:
+	std::mutex keypad_mutex;
     std::vector<char> buff;
     std::vector<char> test;
     int fd;

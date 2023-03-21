@@ -24,12 +24,16 @@ Buzzer::Buzzer()
 
 void Buzzer::SuccessSound(void)
 {
+	this->buzzer_mutex.lock();
     ioctl(this->fd, IOCTL_CMD_SUCCESS_SOUND_BUZZER);
+    this->buzzer_mutex.unlock();
 }
 
 void Buzzer::ButtonPushSound(void)
 {
+    this->buzzer_mutex.lock();
     ioctl(this->fd, IOCTL_CMD_BUTTON_PUSH_SOUND_BUZZER);
+    this->buzzer_mutex.unlock();
 }
 
 Buzzer::~Buzzer()

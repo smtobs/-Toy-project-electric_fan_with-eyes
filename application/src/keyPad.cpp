@@ -38,7 +38,11 @@ void KeyPad::BuffCler()
 char KeyPad::Scan()
 {
     char push_button[2] = {0,};
+
+    this->keypad_mutex.lock();
 	read(fd, push_button, sizeof(push_button));
+    this->keypad_mutex.unlock();
+    
     if (push_button[0] == '\0')
     {
         return '\0';
@@ -49,6 +53,7 @@ char KeyPad::Scan()
     if ((push_button[0] !='A') &&
         (push_button[0] != 'B') &&
         (push_button[0] != 'C') &&
+        //(push_button[0] != '@') &&
         (push_button[0] != 'D'))
     {
         this->buff.push_back(push_button[0]);

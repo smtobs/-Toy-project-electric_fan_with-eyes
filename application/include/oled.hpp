@@ -1,6 +1,7 @@
 #ifndef OLED_H
 #define OLED_H
 
+#include <mutex>
 #include "ioctl_oled.h"
 
 #include <vector>
@@ -14,6 +15,7 @@ public:
     ~Oled();
 
 private:
+    std::mutex oled_mutex;
     int fd;
     static constexpr const char* dev_path = "/dev/oled";
     ioctl_oled_t oled_ioctl;
