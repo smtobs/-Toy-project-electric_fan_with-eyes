@@ -2,12 +2,9 @@ KERNDIR=/lib/modules/$(shell uname -r)/build
 PWD=$(shell pwd)
 
 
-#CFLAGS_KERNEL := -I /home/bsoh/toy_project_smart_home/lib/ioctl
 CFLAGS_KERNEL := -I /home/bsoh/toy_project_smart_home/lib/ioctl
 CFLAGS += -D__KERNEL__ -DKERNEL_5_15 $(CFLAGS_KERNEL)
 CFLAGS += -I $(PWD) -I /home/bsoh/toy_project_smart_home/lib/ioctl
-
-#vpath %.h /home/bsoh/toy_project_smart_home/lib/ioctl
 
 KEYPAD_MODULE=keypad-module
 BUZZER_MODULE=buzzer-module
@@ -22,6 +19,10 @@ clean:
 	make -C $(KERNDIR) M=$(PWD) clean
 	rm -rf *.ko
 	rm -rf *.o
+install:
+	sudo insmod $(OLED_MODULE).ko
+	sudo insmod $(BUZZER_MODULE).ko
+	sudo insmod $(KEYPAD_MODULE).ko
 
 $(KEYPAD_MODULE)-y := \
 	keyPad.o
