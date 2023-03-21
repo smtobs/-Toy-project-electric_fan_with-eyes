@@ -24,16 +24,16 @@ void EventHandler::KeypadEventHandler()
         std::cout << "tiemr...." << std::endl;
         return;
     }
-	else
-	{
-		if (this->is_init_display == true)
-		{
+    else
+    {
+        if (this->is_init_display == true)
+        {
             this->ClearEvent();
             this->DisplayInitialScreen();
             this->RenewScreenTimeHandler();
             this->is_init_display = false;
-		}
-	}
+        }
+    }
 
     char keypad_data[2] = {key_pad->Scan(), 0};
     switch (keypad_data[0])

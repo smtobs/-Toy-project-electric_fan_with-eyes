@@ -40,7 +40,7 @@ char KeyPad::Scan()
     char push_button[2] = {0,};
 
     this->keypad_mutex.lock();
-	read(fd, push_button, sizeof(push_button));
+    read(fd, push_button, sizeof(push_button));
     this->keypad_mutex.unlock();
     
     if (push_button[0] == '\0')
@@ -48,7 +48,7 @@ char KeyPad::Scan()
         return '\0';
     }
     
-	std::cout << "buff : " << push_button << std::endl;
+    std::cout << "buff : " << push_button << std::endl;
 
     if ((push_button[0] !='A') &&
         (push_button[0] != 'B') &&
@@ -68,7 +68,3 @@ KeyPad::~KeyPad()
         close(this->fd);
     }
 }
-
-
-
-

@@ -24,7 +24,7 @@ void EventDriven::StartEventLoop()
 
 void EventDriven::StopEventLoop()
 {
-	ev_timer_stop(this->event_loop, &this->device_timer);
+    ev_timer_stop(this->event_loop, &this->device_timer);
     this->is_event_loop_running = false;    
 }
 

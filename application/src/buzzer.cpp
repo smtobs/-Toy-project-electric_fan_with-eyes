@@ -24,7 +24,7 @@ Buzzer::Buzzer()
 
 void Buzzer::SuccessSound(void)
 {
-	this->buzzer_mutex.lock();
+    this->buzzer_mutex.lock();
     ioctl(this->fd, IOCTL_CMD_SUCCESS_SOUND_BUZZER);
     this->buzzer_mutex.unlock();
 }

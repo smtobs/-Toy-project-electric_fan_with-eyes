@@ -13,7 +13,7 @@ public:
     ~KeyPad();
 
 private:
-	std::mutex keypad_mutex;
+    std::mutex keypad_mutex;
     std::vector<char> buff;
     std::vector<char> test;
     int fd;

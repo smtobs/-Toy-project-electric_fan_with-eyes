@@ -41,7 +41,7 @@ void Oled::WriteDisplay(const char* data, const uint8_t line_no, const uint8_t c
     oled_ioctl.line_no    = line_no;
     oled_ioctl.cursor_pos = cursor_pos;
 
-	this->oled_mutex.lock();
+    this->oled_mutex.lock();
     ioctl(this->fd, IOCTL_OLED_DISPLAY_WRITE, &oled_ioctl);
     this->oled_mutex.unlock();
 }
