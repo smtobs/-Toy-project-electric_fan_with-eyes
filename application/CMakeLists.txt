@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15.2)
 project(smart_home1)
 
+find_package(Boost REQUIRED COMPONENTS thread)
 find_package(OpenSSL REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PahoMqttCpp REQUIRED)
@@ -28,8 +29,11 @@ add_executable(
     src/buzzer.cpp
     src/mqtt_callback.cpp
     src/mqtt_iface.cpp
-    src/utils.cpp
-    src/log.cpp)
+    src/event_handler.cpp
+    src/event_driven.cpp
+    #src/thread_pool.cpp
+    src/utils.cpp)
+    #src/log.cpp)
 
 target_link_libraries(
     ${PROJECT_NAME}
@@ -37,4 +41,7 @@ target_link_libraries(
     OpenSSL::Crypto
     spdlog::spdlog
     PahoMqttCpp::paho-mqttpp3
+    Boost::thread
+    /usr/lib/arm-linux-gnueabihf/libev.so
+    #libev::ev
 )

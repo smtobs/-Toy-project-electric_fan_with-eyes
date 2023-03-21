@@ -3,6 +3,7 @@
 #include <iostream>
 #include <openssl/sha.h>
 #include <cstring>
+#include <ctime>
 
 SystemManager::SystemManager()
 {
@@ -29,7 +30,7 @@ bool SystemManager::PwCompare(std::vector<char> input_pw)
     if (this->GetPw(this->pw))
     {
         std::vector<unsigned char> encryption_input_pw = EncryptionPw(reinterpret_cast<char*>(input_pw.data()));
-        if (IsEqual(this->pw, encryption_input_pw)) 
+        if (this->IsEqual(this->pw, encryption_input_pw)) 
         {
             return true;
         }
@@ -82,6 +83,34 @@ char* SystemManager::GetLocalTime(void)
     snprintf(cur_time, sizeof(cur_time), "%d-%d-%d %d:%d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min);
 
     return cur_time;
+}
+
+uint64_t SystemManager::GetTick(void)
+{
+    struct timespec time_probe;
+    
+    if (clock_gettime(CLOCK_MONOTONIC, &time_probe) == -1)
+    {
+    	std::cout << "clock_gettime error "  << std::endl;
+    }
+	uint64_t time_ms = time_probe.tv_nsec / 1000000UL;
+	time_ms = time_ms + (time_probe.tv_sec * 1000);
+	
+    return time_ms;
+}
+
+bool SystemManager::IsTimeDiff(unsigned long now, unsigned long prev, unsigned long goal)
+{
+    constexpr uint64_t MAX_TIME = 0xFFFFFFFF;
+
+    if (now > prev)
+    {
+    return ((now - prev) >= goal);
+    }
+    else
+    {
+        return (((MAX_TIME - prev) + now + 1 ) >= goal);
+    }
 }
 
 SystemManager::~SystemManager()

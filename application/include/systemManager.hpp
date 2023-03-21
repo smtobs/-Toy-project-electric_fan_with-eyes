@@ -1,10 +1,12 @@
 #ifndef SYS_MANAGER_H
 #define SYS_MANAGER_H
 
-#include "utils.hpp"
 #include <vector>
+#include <iostream>
 
-//template<typename T>
+#include "utils.hpp"
+#include "log.hpp"
+
 class Utils;
 class SystemManager : public Utils
 {
@@ -13,6 +15,8 @@ public:
     bool PwCompare(std::vector<char>);
     bool FindUnitNumber(std::vector<char>);
     char* GetLocalTime(void);
+    uint64_t GetTick();
+    bool IsTimeDiff(unsigned long now, unsigned long prev, unsigned long goal);
     ~SystemManager();
 
 private:
