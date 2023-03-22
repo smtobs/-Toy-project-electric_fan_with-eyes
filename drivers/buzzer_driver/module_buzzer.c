@@ -65,6 +65,10 @@ static long IoctlBuzzerModule(struct file *filp, unsigned int cmd, unsigned long
             buzzer_mgr.SuccessSoundFunc(&buzzer_mgr);
             break;
 
+        case IOCTL_CMD_FAIL_SOUND_BUZZER :
+            buzzer_mgr.FailSoundFunc(&buzzer_mgr);
+            break;
+
         case IOCTL_CMD_BUTTON_PUSH_SOUND_BUZZER :
             buzzer_mgr.ButtonPushSoundFunc(&buzzer_mgr);
             break;

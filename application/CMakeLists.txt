@@ -11,13 +11,14 @@ link_directories("libs")
 include_directories(
     include
     ../lib/ioctl
+    ../lib/rapidjson/include
     ${CMAKE_CURRENT_SOURCE_DIR}/smart_home
     ${PAHO_MQTT_CPP_INCLUDE_DIRS}
 )
 
-set(CMAKE_CXX_COMPILER g++)
+#set(CMAKE_CXX_COMPILER g++)
 #set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(

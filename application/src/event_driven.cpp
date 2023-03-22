@@ -1,12 +1,15 @@
 #include "event_driven.hpp"
 #include "timer_callback.hpp"
+#include "signal_callback.hpp"
 
 EventDriven::EventDriven(size_t num_threads)
 {
     this->pool    = new ThreadPool(num_threads);
     this->handle  = new EventHandler();
-    TimerCallBack::RegisterTimer(this);
+    
     this->event_loop = ev_default_loop(0);
+    TimerCallBack::RegisterTimer(this);
+    SigCallBack::RegisterSignal(this);
 }
 
 void EventDriven::StartEventLoop()
@@ -14,6 +17,7 @@ void EventDriven::StartEventLoop()
     if (this->is_event_loop_running == false)
     {
         ev_timer_start(this->event_loop, &this->device_timer);
+        ev_timer_start(this->event_loop, &this->network_timer);
         ev_loop(this->event_loop, 0);
     }
     else
@@ -25,7 +29,9 @@ void EventDriven::StartEventLoop()
 void EventDriven::StopEventLoop()
 {
     ev_timer_stop(this->event_loop, &this->device_timer);
+    ev_timer_stop(this->event_loop, &this->network_timer);
     this->is_event_loop_running = false;    
+    ev_break(this->event_loop, EVBREAK_ALL);
 }
 
 void EventDriven::DeviceEventListener(uint16_t event_flag)
@@ -57,44 +63,38 @@ void EventDriven::DeviceTimerHandler(struct ev_loop *loop, ev_timer* w, int reve
        event_flag |= 1u << TIME_UPDATE_EVENT;
        cnt[TIME_UPDATE_EVENT] = 0u;
     }
-    this->pool->Enqueue(boost::bind(&EventDriven::DeviceEventListener, this, event_flag));
+    pool->Enqueue(boost::bind(&EventDriven::DeviceEventListener, this, event_flag));
 }
 
 void EventDriven::NetworkTimerHandler(struct ev_loop *loop, ev_timer *w, int revents)
 {
-    #if (0)
     static uint8_t cnt[MAX_NETWORK_EVENT] = {0u,};
     uint16_t event_flag = 0x0;
 
-    event_flag |= 1u << KEYPAD_EVENT;
-
-    if ((++cnt[BROKER_CHK_CON_EVENT]) >= BROKER_CHK_CON_EVENT_PERIOD)
+    if ((++cnt[BROKER_RETRY_CON_EVENT]) >= BROKER_RETRY_CON_EVENT_PERIOD)
     {
-       event_flag |= 1u << BROKER_CHK_CON_EVENT;
+       event_flag |= 1u << BROKER_RETRY_CON_EVENT;
+       cnt[BROKER_RETRY_CON_EVENT] = 0u;
     }
 
-    if ((++cnt[GET_WIFI_SIG_EVENT]) >= GET_WIFI_SIG_EVENT_PERIOD)
-    {
-       event_flag |= 1u << GET_WIFI_SIG_EVENT;
-    }
-
-    this->pool.Enqueue(boost::bind(this->DeviceEventListener, event_flag));
-    #endif
+  //  if ((++cnt[GET_WIFI_SIG_EVENT]) >= GET_WIFI_SIG_EVENT_PERIOD)
+    //{
+      // event_flag |= 1u << GET_WIFI_SIG_EVENT;
+   // }
+    pool->Enqueue(boost::bind(&EventDriven::NetworkEventListener, this, event_flag));
 }
 
 void EventDriven::NetworkEventListener(uint16_t event_flag)
 {
-    #if (0)
-    if (event_flag & BROKER_CHK_CON_EVENT)
+    if (event_flag & (1u << BROKER_RETRY_CON_EVENT))
     {
-        //this->KeypadEventHandler();
+        handle->RetryConBrokerHandler();
     }
 
-    if (event_flag & GET_WIFI_SIG_EVENT)
-    {
+    //if (event_flag & (1u << GET_WIFI_SIG_EVENT))
+    //{
         //this->RenewScreenTimeHandler();
-    }
-    #endif
+    //}
 }
 
 void EventDriven::StartTimer()
@@ -108,7 +108,6 @@ void EventDriven::StopTimer()
 
 EventDriven::~EventDriven()
 {
-    this->StopEventLoop();
     delete this->pool;
     delete this->handle;
 }

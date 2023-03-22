@@ -29,6 +29,13 @@ void Buzzer::SuccessSound(void)
     this->buzzer_mutex.unlock();
 }
 
+void Buzzer::FailSound(void)
+{
+    this->buzzer_mutex.lock();
+    ioctl(this->fd, IOCTL_CMD_FAIL_SOUND_BUZZER);
+    this->buzzer_mutex.unlock();
+}
+
 void Buzzer::ButtonPushSound(void)
 {
     this->buzzer_mutex.lock();

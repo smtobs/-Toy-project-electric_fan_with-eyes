@@ -11,11 +11,11 @@ bool MqttIface::ConnectBroker()
     try
     {   
         //mqtt::async_client client = this->CreateAsynClient();
-        mqtt::connect_options connOpts;
-        connOpts.set_keep_alive_interval(20);
-        connOpts.set_clean_session(true);
+        mqtt::connect_options conn_opts;
+        conn_opts.set_keep_alive_interval(20);
+        conn_opts.set_clean_session(true);
 
-        mqtt::token_ptr conntok = this->client->connect(connOpts);
+        mqtt::token_ptr conntok = this->client->connect(conn_opts);
         conntok->wait_for(this->TIMEOUT);
     }
     catch(const mqtt::exception& e)
@@ -36,6 +36,11 @@ void MqttIface::DisconnectBroker()
     {
         std::cerr << e.what() << std::endl;
     }
+}
+
+bool MqttIface::IsConnected()
+{
+	return client->is_connected();
 }
 
 void MqttIface::Publish(const std::string& topic, const std::string& msg)

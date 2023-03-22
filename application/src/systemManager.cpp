@@ -27,27 +27,21 @@ bool SystemManager::FindUnitNumber(std::vector<char> input_unit_num)
 
 bool SystemManager::PwCompare(std::vector<char> input_pw)
 {
-    if (this->GetPw(this->pw))
-    {
-        std::vector<unsigned char> encryption_input_pw = EncryptionPw(reinterpret_cast<char*>(input_pw.data()));
-        if (this->IsEqual(this->pw, encryption_input_pw)) 
-        {
-            return true;
-        }
-    }
-    else
-    {
-        std::cout << "시스템 패스워드를 획득 할 수 없습니다. !!!!!!!!!!!!" << std::endl;
-    }
+	std::vector<unsigned char> encryption_input_pw = EncryptionPw(reinterpret_cast<char*>(input_pw.data()));
+	if (this->IsEqual(this->GetPw(), encryption_input_pw)) 
+	{
+        return true;
+	}
     return false;
 }
 
-bool SystemManager::GetPw(std::vector<unsigned char>& sys_pw)
+std::vector<unsigned char> SystemManager::GetPw()
 {
+	std::vector<unsigned char> v;
     unsigned char t[] = "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f"; // 1 2 3 4
-    sys_pw.insert(sys_pw.begin(), std::begin(t), std::end(t));
+    v.insert(v.begin(), std::begin(t), std::end(t));
 
-    return true;
+    return  v;
 }
 
 std::vector<unsigned char> SystemManager::EncryptionPw(char* pw)

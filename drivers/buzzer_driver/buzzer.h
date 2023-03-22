@@ -10,6 +10,7 @@ typedef struct buzzer_obj_t
      int major_num;
      bool instance;
      void (*SuccessSoundFunc)(struct buzzer_obj_t *this);
+     void (*FailSoundFunc)(struct buzzer_obj_t *this);
      void (*ButtonPushSoundFunc)(struct buzzer_obj_t *this);
      void (*RemoveObjFunc)(struct buzzer_obj_t *this);
 }buzzer_obj_t;

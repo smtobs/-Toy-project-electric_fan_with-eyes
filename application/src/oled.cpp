@@ -35,13 +35,13 @@ void Oled::WriteDisplay(std::vector<char> data, const uint8_t line_no, const uin
 
 void Oled::WriteDisplay(const char* data, const uint8_t line_no, const uint8_t cursor_pos)
 {
+    this->oled_mutex.lock();
     memset(&oled_ioctl.str, 0x0, sizeof(oled_ioctl.str));
 
     std::strncpy(oled_ioctl.str, data, strlen(data));
     oled_ioctl.line_no    = line_no;
     oled_ioctl.cursor_pos = cursor_pos;
 
-    this->oled_mutex.lock();
     ioctl(this->fd, IOCTL_OLED_DISPLAY_WRITE, &oled_ioctl);
     this->oled_mutex.unlock();
 }

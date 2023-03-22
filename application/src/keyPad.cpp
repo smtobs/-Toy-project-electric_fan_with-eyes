@@ -32,6 +32,7 @@ void KeyPad::BuffCler()
     if (this->buff.size())
     {
         this->buff.clear();
+		this->buff.shrink_to_fit();
     }
 }
 
