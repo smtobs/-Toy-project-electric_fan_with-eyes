@@ -14,6 +14,7 @@ public:
     MqttIface();
     bool ConnectBroker();
     void DisconnectBroker();
+    bool IsConnected();
     void Publish(const std::string& topic, const std::string& msg);
     void Subscribe(const std::string& topic);
     ~MqttIface();

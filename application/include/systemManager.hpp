@@ -24,6 +24,6 @@ private:
     int MAX_PW;
     
     std::vector<unsigned char> EncryptionPw(char* pw);
-    bool GetPw(std::vector<unsigned char>&);
+    std::vector<unsigned char> GetPw();
 };
 #endif

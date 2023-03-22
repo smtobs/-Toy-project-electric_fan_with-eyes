@@ -13,14 +13,14 @@ public:
     struct ev_timer network_timer;
     
     EventDriven(size_t num_threads);
-    void NetworkTimerHandler(struct ev_loop *loop, ev_timer *w, int revents);
-    void NetworkEventListener(uint16_t event_flag);
     void StartEventLoop();
     void StopEventLoop();
     void StartTimer();
     void StopTimer();
     void DeviceEventListener(uint16_t event_flag);
     void DeviceTimerHandler(struct ev_loop *loop, ev_timer *w, int revents);
+    void NetworkTimerHandler(struct ev_loop *loop, ev_timer *w, int revents);
+    void NetworkEventListener(uint16_t event_flag);
     ~EventDriven();
 
 private:
@@ -33,8 +33,13 @@ private:
     static constexpr uint16_t KEYPAD_EVENT      = 0u;
     static constexpr uint16_t TIME_UPDATE_EVENT = 1u;
     static constexpr uint16_t MAX_EVENT         = 2u;
+    
+    static constexpr uint16_t BROKER_RETRY_CON_EVENT   = 0u;
+    static constexpr uint16_t MAX_NETWORK_EVENT        = 1u;
 
-    static constexpr uint16_t TIME_UPDATE_EVENT_PERIOD = 10;
-    static constexpr uint16_t KEYPAD_EVENT_PERIOD      = 1u;   // 0.1s 
+    static constexpr uint16_t TIME_UPDATE_EVENT_PERIOD      = 10u;   // 1s
+    static constexpr uint16_t KEYPAD_EVENT_PERIOD           = 1u;   // 0.1s 
+    static constexpr uint16_t BROKER_RETRY_CON_EVENT_PERIOD = 30u;  // 3s
+    
 };
 #endif

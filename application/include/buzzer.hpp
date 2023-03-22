@@ -9,6 +9,7 @@ class Buzzer
 public:
     Buzzer();
     void SuccessSound(void);
+    void FailSound(void);
     void ButtonPushSound(void);
     ~Buzzer();
 

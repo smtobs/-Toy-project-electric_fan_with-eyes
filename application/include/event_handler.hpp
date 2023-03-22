@@ -16,6 +16,7 @@ public:
     EventHandler();
     void KeypadEventHandler();
     void RenewScreenTimeHandler();
+    void RetryConBrokerHandler();
     ~EventHandler();
 
 private:
@@ -25,21 +26,18 @@ private:
     SystemManager* sys_mgr;
     MqttIface* mqtt_iface;    
     std::atomic<unsigned char> pw_input_count;
-#if (0)
-    std::atomic<uint64_t> curr_display_lock_tm;
-    std::atomic<uint64_t> prev_display_lock_tm;
-    std::atomic<uint64_t> display_lock_tm;
-#else
-    std::atomic<unsigned long> curr_display_lock_tm;
     std::atomic<unsigned long> prev_display_lock_tm;
     std::atomic<unsigned long> display_lock_tm;
-#endif
     std::atomic<bool> is_init_display;
     
     void ClearEvent();
-    void OpenDoorEvent();
-    void DisplayInitialScreen();
-    void WritePasswordOnScreen(const char* data);
+    void SuccessPwEvent();
+    void FailPwEvent();
+    void OpenDoor();
+    void LockDisplay(uint64_t lock_tm);
+    void InitDisplay();
+    void WritePasswordOnDisplay(const char* data);
+    const char* CreateOpenDoorMsg();
     
     #define  PASSWORD   'A'
     #define  CALL       'B'
