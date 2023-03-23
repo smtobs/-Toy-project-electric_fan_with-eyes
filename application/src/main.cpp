@@ -13,7 +13,7 @@ public:
     {
         if (this->OptionHandler() == false)
         {
-           exit(-1);
+		std::exit(0);
         }
 
         YAML::Node& config = const_cast<YAML::Node&>(this->config);
@@ -43,19 +43,15 @@ public:
     }
     
 private:
-	EventDriven* ev_driven;
-	mutable YAML::Node config;
+    EventDriven* ev_driven;
+    mutable YAML::Node config;
     std::string config_path;
-	int argc_;
-	char** argv_;
+    int argc_;
+    char** argv_;
 
     void Help(const char* cmd)
     {
-        if (cmd == NULL)
-        {
-            std::fprintf(stderr, "Please enter an option.");
-        }
-        std::fprintf(stderr, "Usage : %s [-d -f Config File Name]\n", cmd);
+        std::fprintf(stderr, "Usage : [-d -f Config File Name]\n");
         std::fprintf(stderr, "  -d,         Background\n");
         std::fprintf(stderr, "  -f,         Config file path\n");
         std::fprintf(stderr, "  -h,         Help\n\n");
@@ -63,31 +59,37 @@ private:
 
     bool OptionHandler()
     {
-        if (this->argc_ < 1)
+        if (this->argc_ <= 1)
         {
             return false;
         }
 
         int opt;
-        while ((opt = getopt(this->argc_, this->argv_, "dfh:")) != -1)
+        while ((opt = getopt(this->argc_, this->argv_, "f:dh")) != -1)
         {
             switch (opt)
             {
                 case 'd':
+		{
                     //daemonize(); Todo
                     break;
-
+		}
                 case 'f':
-                    this->SetConfigPath(std::string str(optarg));
+		{
+		    std::string str(optarg);
+                    this->SetConfigPath(str);
                     break;
-
-                case 'h'
+		}
+		case 'h':
+		{
                     this->Help(optarg);
                     return false;
-
+		}
                 default:
+		{
                     std::fprintf(stderr, "Unknown option: %c\n", optopt);
                     return false;
+		}
             }
         }
         return true; 
@@ -97,7 +99,7 @@ private:
 int main(int argc, char** argv)
 {	
     std::unique_ptr<Core> core(new Core(argc, argv));
-	core->Start();
+    core->Start();
 	
     return 0;
 }
