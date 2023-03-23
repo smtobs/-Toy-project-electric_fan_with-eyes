@@ -7,7 +7,7 @@
 class Buzzer
 {
 public:
-    Buzzer();
+    Buzzer(const char* dev_path);
     void SuccessSound(void);
     void FailSound(void);
     void ButtonPushSound(void);
@@ -16,6 +16,5 @@ public:
 private:
     std::mutex buzzer_mutex;
     int fd;
-    static constexpr const char* dev_path = "/dev/buzzer";
 };
 #endif

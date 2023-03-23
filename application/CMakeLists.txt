@@ -5,6 +5,7 @@ find_package(Boost REQUIRED COMPONENTS thread)
 find_package(OpenSSL REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PahoMqttCpp REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 link_directories("libs")
 
@@ -16,8 +17,6 @@ include_directories(
     ${PAHO_MQTT_CPP_INCLUDE_DIRS}
 )
 
-#set(CMAKE_CXX_COMPILER g++)
-#set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -32,9 +31,7 @@ add_executable(
     src/mqtt_iface.cpp
     src/event_handler.cpp
     src/event_driven.cpp
-    #src/thread_pool.cpp
     src/utils.cpp)
-    #src/log.cpp)
 
 target_link_libraries(
     ${PROJECT_NAME}
@@ -44,5 +41,6 @@ target_link_libraries(
     PahoMqttCpp::paho-mqttpp3
     Boost::thread
     /usr/lib/arm-linux-gnueabihf/libev.so
+    yaml-cpp
     #libev::ev
 )

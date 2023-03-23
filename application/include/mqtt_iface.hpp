@@ -11,21 +11,24 @@
 class MqttIface : public virtual mqtt::callback
 {
 public:
-    MqttIface();
+   MqttIface(const std::string& broker_url, const std::string& pub_topic_name,
+    			const std::string& cli_id, int qos, int interval, int time_out);
+			
     bool ConnectBroker();
     void DisconnectBroker();
     bool IsConnected();
     void Publish(const std::string& topic, const std::string& msg);
     void Subscribe(const std::string& topic);
+    std::string GetPubTopicName();
     ~MqttIface();
     
 private:
     mqtt::async_client* client;
     callback cb;
-    const std::string BROKER_ADDRESS = "tcp://192.168.219.103:1883";
-    const std::string CLIENT_ID      = "access_control_system";
-    const int QOS                    = 1;
-    const int TIMEOUT                = 1000;
+    std::string pub_topic_name;
+    int qos;
+    int time_out;
+    int interval;
 };
 
 #endif

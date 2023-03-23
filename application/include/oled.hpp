@@ -8,7 +8,7 @@
 class Oled
 {
 public:
-    Oled();
+    Oled(const char* dev_path);
     void WriteDisplay(std::vector<char>, const uint8_t, const uint8_t);
     void WriteDisplay(const char *, const uint8_t, const uint8_t);
     void ClearDisplay(void);
@@ -17,7 +17,6 @@ public:
 private:
     std::mutex oled_mutex;
     int fd;
-    static constexpr const char* dev_path = "/dev/oled";
     ioctl_oled_t oled_ioctl;
 };
 #endif

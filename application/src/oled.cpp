@@ -9,16 +9,11 @@
 
 #include "oled.hpp"
 
-Oled::Oled()
+Oled::Oled(const char* dev_path)
 {
-    if (access(this->dev_path, F_OK) != 0)
+    if ((this->fd = open(dev_path, O_RDWR)) < 0)
     {
-        
-    }
-
-    if ((this->fd = open(this->dev_path, O_RDWR)) < 0)
-    {
-        std::cout << this->dev_path << " Open Failed [" << strerror(errno) << "]" <<  std::endl;
+        std::cout << dev_path << " Open Failed [" << strerror(errno) << "]" <<  std::endl;
     }
 
     memset(&oled_ioctl, 0x0, sizeof(ioctl_oled_t));

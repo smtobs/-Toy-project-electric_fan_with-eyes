@@ -2,13 +2,24 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-EventHandler::EventHandler()
+EventHandler::EventHandler(const YAML::Node &config)
 {
-    buzzer         = new Buzzer();
-    key_pad        = new KeyPad();
-    oled           = new Oled();
+std::string ret_config = config["DRIVERS"]["BUZZER_PATH"].as<std::string>();
+buzzer         = new Buzzer(ret_config.c_str());
+      
+  ret_config = config["DRIVERS"]["KEYPAD_PATH"].as<std::string>();
+    key_pad        = new KeyPad(ret_config.c_str());
+    
+    ret_config    = config["DRIVERS"]["OLED_PATH"].as<std::string>();
+    oled           = new Oled(ret_config.c_str());
+    
     sys_mgr        = new SystemManager();
-    mqtt_iface     = new MqttIface();
+    mqtt_iface     = new MqttIface(config["MQTT"]["DOOR"]["BROKER_URL"].as<std::string>(),
+    					config["MQTT"]["DOOR"]["PUB_TOPIC_NAME"].as<std::string>(),
+    					config["MQTT"]["DOOR"]["CLI_ID"].as<std::string>(),
+    					config["MQTT"]["DOOR"]["QOS"].as<int>(), 
+    					config["MQTT"]["DOOR"]["INTERVAL"].as<int>(),
+    					config["MQTT"]["DOOR"]["TIME_OUT"].as<int>());
 
     this->LockDisplay(0UL);
 	
@@ -113,7 +124,7 @@ void EventHandler::OpenDoor()
     oled->WriteDisplay("Correct Password.\n", 3, 14);
     oled->WriteDisplay("The door opens.\n", 4, 20);
     
-    mqtt_iface->Publish("/home/door", this->CreateOpenDoorMsg());
+    mqtt_iface->Publish(mqtt_iface->GetPubTopicName(), this->CreateOpenDoorMsg());
     buzzer->SuccessSound();
 }
 

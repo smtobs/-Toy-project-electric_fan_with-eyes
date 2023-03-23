@@ -5,6 +5,7 @@
 
 #include "thread_pool.hpp"
 #include "event_handler.hpp"
+#include "yaml-cpp/yaml.h"
 
 class EventDriven
 {
@@ -12,7 +13,7 @@ public:
     struct ev_timer device_timer;
     struct ev_timer network_timer;
     
-    EventDriven(size_t num_threads);
+    EventDriven(const YAML::Node& config);
     void StartEventLoop();
     void StopEventLoop();
     void StartTimer();

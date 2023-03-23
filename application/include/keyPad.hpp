@@ -6,7 +6,7 @@
 class KeyPad
 {
 public:
-    KeyPad();
+    KeyPad(const char* dev_path);
     std::vector<char> BuffCpy();
     void BuffCler();
     char Scan();
@@ -17,6 +17,5 @@ private:
     std::vector<char> buff;
     std::vector<char> test;
     int fd;
-    static constexpr const char* dev_path = "/dev/keyPad";
 };
 #endif

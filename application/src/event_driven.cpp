@@ -2,10 +2,10 @@
 #include "timer_callback.hpp"
 #include "signal_callback.hpp"
 
-EventDriven::EventDriven(size_t num_threads)
+EventDriven::EventDriven(const YAML::Node& config)
 {
-    this->pool    = new ThreadPool(num_threads);
-    this->handle  = new EventHandler();
+    this->pool    = new ThreadPool(3);
+    this->handle  = new EventHandler(config);
     
     this->event_loop = ev_default_loop(0);
     TimerCallBack::RegisterTimer(this);

@@ -1,0 +1,20 @@
+DRIVERS:
+  BUZZER_PATH: /dev/buzzer
+  OLED_PATH: /dev/oled
+  KEYPAD_PATH: /dev/keyPad
+
+MQTT:
+  DOOR:
+    BROKER_URL: 192.168.219.103:1883
+    PUB_TOPIC_NAME: /home/door
+    SUB_TOPIC_NAME: TBD
+    CLI_ID: bsoh
+    QOS: 1
+    INTERVAL: 20
+    TIME_OUT: 1000
+    
+THREAD_POOL:
+  NUM: 3
+  
+TIMER:
+  DEVICE_PER:  

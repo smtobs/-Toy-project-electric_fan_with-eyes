@@ -9,11 +9,12 @@
 #include "systemManager.hpp"
 #include "buzzer.hpp"
 #include "mqtt_iface.hpp"
+#include "yaml-cpp/yaml.h"
 
 class EventHandler
 {
 public:
-    EventHandler();
+    EventHandler(const YAML::Node &config);
     void KeypadEventHandler();
     void RenewScreenTimeHandler();
     void RetryConBrokerHandler();
