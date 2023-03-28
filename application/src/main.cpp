@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include <unistd.h>
+#include <cassert>
 
 #include "yaml-cpp/yaml.h"
 #include "utils.hpp"
@@ -11,10 +12,7 @@ class Core
 public:
     Core(int argc, char **argv) : argc_(argc), argv_(argv)
     {
-        if (this->OptionHandler() == false)
-        {
-		std::exit(0);
-        }
+        assert(this->OptionHandler() != false);
 
         YAML::Node& config = const_cast<YAML::Node&>(this->config);
         config = YAML::LoadFile(this->GetConfigPath());
@@ -70,26 +68,29 @@ private:
             switch (opt)
             {
                 case 'd':
-		{
+                {
                     //daemonize(); Todo
                     break;
-		}
+                }
+                
                 case 'f':
-		{
-		    std::string str(optarg);
+                {
+                    std::string str(optarg);
                     this->SetConfigPath(str);
                     break;
-		}
-		case 'h':
-		{
+                }
+
+                case 'h':
+                {
                     this->Help(optarg);
                     return false;
-		}
+                }
+
                 default:
-		{
+                {
                     std::fprintf(stderr, "Unknown option: %c\n", optopt);
                     return false;
-		}
+                }
             }
         }
         return true; 
@@ -97,9 +98,9 @@ private:
 };
 
 int main(int argc, char** argv)
-{	
+{
     std::unique_ptr<Core> core(new Core(argc, argv));
     core->Start();
-	
+
     return 0;
 }

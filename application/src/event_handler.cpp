@@ -4,10 +4,10 @@
 
 EventHandler::EventHandler(const YAML::Node &config)
 {
-std::string ret_config = config["DRIVERS"]["BUZZER_PATH"].as<std::string>();
-buzzer         = new Buzzer(ret_config.c_str());
+    std::string ret_config = config["DRIVERS"]["BUZZER_PATH"].as<std::string>();
+    buzzer         = new Buzzer(ret_config.c_str());
       
-  ret_config = config["DRIVERS"]["KEYPAD_PATH"].as<std::string>();
+    ret_config = config["DRIVERS"]["KEYPAD_PATH"].as<std::string>();
     key_pad        = new KeyPad(ret_config.c_str());
     
     ret_config    = config["DRIVERS"]["OLED_PATH"].as<std::string>();
@@ -51,17 +51,17 @@ void EventHandler::KeypadEventHandler()
             break;
 
         case CALL:
-            this->ClearEvent();
+            this->IntercomEvent();
             break;
 
         case PASSWORD:
             if (sys_mgr->PwCompare(key_pad->BuffCpy()))
             {
-		this->SuccessPwEvent();
+                this->SuccessPwEvent();
             }
             else
             {
-		this->FailPwEvent();
+				this->FailPwEvent();
             }
             break;
 
@@ -81,6 +81,14 @@ void EventHandler::KeypadEventHandler()
     }
 }
 
+void EventHandler::IntercomEvent()
+{
+    this->LockDisplay(10000UL);
+    oled->ClearDisplay();                 
+    oled->WriteDisplay("Requesting permission to enter..\n", 3, 1);
+    video->SendImgCamera(video->read_image, video->destination);
+}
+
 void EventHandler::RenewScreenTimeHandler()
 {
     oled->WriteDisplay(sys_mgr->GetLocalTime(), 0, 0);
@@ -88,11 +96,38 @@ void EventHandler::RenewScreenTimeHandler()
 
 void EventHandler::RetryConBrokerHandler()
 {
+    static bool is_sub_topic = false; 
     if (mqtt_iface->IsConnected() == false)
     {
-    	mqtt_iface->DisconnectBroker();
-    	mqtt_iface->ConnectBroker();
-    	std::cout << "Try Connection Broker" << std::endl;
+        //mqtt_iface->DisconnectBroker();
+        mqtt_iface->ConnectBroker();
+        std::cout << "Try Connection Broker" << std::endl;
+        is_sub_topic = false;
+    }
+    else
+    {
+    	if (is_sub_topic == false)
+    	{
+            mqtt_iface->Subscribe("/home/access");
+            is_sub_topic = true;
+    	}
+    	else
+    	{
+    		if (mqtt_iface->cb.IsMsgArrived() == true)
+    		{
+    			std::string topic_msg = mqtt_iface->cb.GetSubTopicMsg();
+    			mqtt_iface->cb.ClearSubTopicMsg();
+
+                if (this->IsEqual(topic_msg, "allow"))
+                {
+                    this->AllowAccessEvent();
+                }
+                else if (this->IsEqual(topic_msg, "deny"))
+                {
+                    this->DenyAccessEvent();
+                }
+    		}
+    	}
     }
 }
 
@@ -105,25 +140,39 @@ void EventHandler::ClearEvent()
 
 void EventHandler::SuccessPwEvent()
 {
-    this->OpenDoor();
     this->LockDisplay(5000UL);
+    oled->ClearDisplay();                 
+    oled->WriteDisplay("Correct Password.\n", 3, 14);
+    this->OpenDoor();
 }
 
 void EventHandler::FailPwEvent()
 {
+    this->LockDisplay(3000UL);
     this->ClearEvent();
     oled->WriteDisplay("Door Open Failed\n", 4, 17);
     this->RenewScreenTimeHandler();
     buzzer->FailSound();
-    this->LockDisplay(3000UL);
+}
+
+void EventHandler::AllowAccessEvent()
+{
+	this->LockDisplay(5000UL);
+    this->ClearEvent();
+	this->OpenDoor();
+}
+
+void EventHandler::DenyAccessEvent()
+{
+	this->LockDisplay(3000UL);
+    this->ClearEvent();
+    oled->WriteDisplay("Access Denied\n", 4, 17);
+    this->RenewScreenTimeHandler();	
 }
 
 void EventHandler::OpenDoor()
 {
-    oled->ClearDisplay();                 
-    oled->WriteDisplay("Correct Password.\n", 3, 14);
     oled->WriteDisplay("The door opens.\n", 4, 20);
-    
     mqtt_iface->Publish(mqtt_iface->GetPubTopicName(), this->CreateOpenDoorMsg());
     buzzer->SuccessSound();
 }

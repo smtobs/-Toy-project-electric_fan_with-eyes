@@ -14,8 +14,7 @@ public:
     Utils();
     bool IsEqual(std::vector<char> const &v1, std::vector<char> const &v2);
     bool IsEqual(std::vector<unsigned char> const &v1, std::vector<unsigned char> const &v2);
-    void test();
-    
+    bool IsEqual(const std::string& v1, const std::string& v2);
     ~Utils();
 };
 #endif

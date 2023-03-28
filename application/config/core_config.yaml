@@ -7,7 +7,7 @@ MQTT:
   DOOR:
     BROKER_URL: 192.168.219.103:1883
     PUB_TOPIC_NAME: /home/door
-    SUB_TOPIC_NAME: TBD
+    SUB_TOPIC_NAME: /home/access
     CLI_ID: bsoh
     QOS: 1
     INTERVAL: 20
@@ -17,4 +17,9 @@ THREAD_POOL:
   NUM: 3
   
 TIMER:
-  DEVICE_PER:  
+  DEVICE_PER:
+
+VIDEO:
+  READ_PATH: /dev/video0
+  DEST_IP: 192.168.219.105
+  DEST_PORT: 18080

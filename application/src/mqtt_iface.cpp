@@ -1,26 +1,26 @@
 #include "mqtt_iface.hpp"
+#include "mqtt/iaction_listener.h"
+#include "mqtt/client.h"
 
 MqttIface::MqttIface(const std::string& broker_url, const std::string& pub_topic_name_, const std::string& cli_id,
 			int qos, int interval, int time_out)
 {
-    this->client = new mqtt::async_client(broker_url, cli_id);
-    this->client->set_callback(this->cb);
-    
+    this->client         = new mqtt::async_client(broker_url, cli_id);
     this->qos            = qos;
     this->time_out       = time_out;
     this->interval       = interval;
     this->pub_topic_name = pub_topic_name_;
+
+    this->client->set_callback(this->cb);
 }
 
 bool MqttIface::ConnectBroker()
 {
     try
     {   
-        //mqtt::async_client client = this->CreateAsynClient();
         mqtt::connect_options conn_opts;
         conn_opts.set_keep_alive_interval(this->interval);
-        conn_opts.set_clean_session(true);
-
+        //conn_opts.set_clean_session(true);
         mqtt::token_ptr conntok = this->client->connect(conn_opts);
         conntok->wait_for(this->time_out);
     }
@@ -72,18 +72,18 @@ std::string MqttIface::GetPubTopicName()
 
 void MqttIface::Subscribe(const std::string& topic)
 {
-    // try
-    // {
-    //     mqtt::subscribe_options subOpts;
-    //     subOpts.set_qos(this->QOS);
+    my_iaction_listener listenr;
 
-    //     mqtt::token_ptr subtok = client.subscribe(topic, subOpts);
-    //     subtok->wait_for_completion();
-    // }
-    // catch(const mqtt::exception& e)
-    // {
-    //     std::cerr << e.what() << std::endl;
-    // }
+    try
+    {
+        mqtt::token_ptr subtok = client->subscribe(topic, 1, nullptr, listenr);
+        this->client->start_consuming();
+        subtok->wait();
+    }
+    catch(const mqtt::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
 }
 
 MqttIface::~MqttIface()

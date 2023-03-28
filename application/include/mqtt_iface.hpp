@@ -2,16 +2,18 @@
 #define MQTT_MANAGER_H
 
 #include <MQTTAsync.h>
-#include "mqtt/async_client.h"
+#include <mqtt/async_client.h>
 #include "mqtt_callback.hpp"
 #include <string>
 #include <iostream>
 #include <cstring>
 
-class MqttIface : public virtual mqtt::callback
+class MqttIface
 {
 public:
-   MqttIface(const std::string& broker_url, const std::string& pub_topic_name,
+	callback cb;
+
+    MqttIface(const std::string& broker_url, const std::string& pub_topic_name,
     			const std::string& cli_id, int qos, int interval, int time_out);
 			
     bool ConnectBroker();
@@ -24,7 +26,6 @@ public:
     
 private:
     mqtt::async_client* client;
-    callback cb;
     std::string pub_topic_name;
     int qos;
     int time_out;

@@ -6,6 +6,8 @@ find_package(OpenSSL REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PahoMqttCpp REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(CURL REQUIRED)
 
 link_directories("libs")
 
@@ -15,6 +17,7 @@ include_directories(
     ../lib/rapidjson/include
     ${CMAKE_CURRENT_SOURCE_DIR}/smart_home
     ${PAHO_MQTT_CPP_INCLUDE_DIRS}
+    ${CURL_INCLUDE_DIR}
 )
 
 set(CMAKE_CXX_STANDARD 11)
@@ -27,7 +30,7 @@ add_executable(
     src/keyPad.cpp
     src/systemManager.cpp
     src/buzzer.cpp
-    src/mqtt_callback.cpp
+
     src/mqtt_iface.cpp
     src/event_handler.cpp
     src/event_driven.cpp
@@ -42,5 +45,6 @@ target_link_libraries(
     Boost::thread
     /usr/lib/arm-linux-gnueabihf/libev.so
     yaml-cpp
-    #libev::ev
+    ${OpenCV_LIBS}
+    ${CURL_LIBRARIES}
 )

@@ -9,9 +9,10 @@
 #include "systemManager.hpp"
 #include "buzzer.hpp"
 #include "mqtt_iface.hpp"
+#include "video.hpp"
 #include "yaml-cpp/yaml.h"
 
-class EventHandler
+class EventHandler : public Utils
 {
 public:
     EventHandler(const YAML::Node &config);
@@ -25,15 +26,19 @@ private:
     KeyPad* key_pad;
     Oled* oled;
     SystemManager* sys_mgr;
-    MqttIface* mqtt_iface;    
+    MqttIface* mqtt_iface;   
+    Video* video; 
     std::atomic<unsigned char> pw_input_count;
     std::atomic<unsigned long> prev_display_lock_tm;
     std::atomic<unsigned long> display_lock_tm;
     std::atomic<bool> is_init_display;
     
+    void IntercomEvent();
     void ClearEvent();
     void SuccessPwEvent();
     void FailPwEvent();
+    void AllowAccessEvent();
+    void DenyAccessEvent();
     void OpenDoor();
     void LockDisplay(uint64_t lock_tm);
     void InitDisplay();
