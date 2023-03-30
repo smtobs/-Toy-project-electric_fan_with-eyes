@@ -1,9 +1,12 @@
 #ifndef KEYPAD_H
 #define KEYPAD_H
+
 #include <vector>
 #include <mutex>
 
-class KeyPad
+#include "utils.hpp"
+
+class KeyPad : public Utils
 {
 public:
     KeyPad(const char* dev_path);

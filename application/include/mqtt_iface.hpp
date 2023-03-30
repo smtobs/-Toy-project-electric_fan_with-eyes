@@ -1,5 +1,5 @@
-#ifndef MQTT_MANAGER_H
-#define MQTT_MANAGER_H
+#ifndef MQTT_IFACE_H
+#define MQTT_IFACE_H
 
 #include <MQTTAsync.h>
 #include <mqtt/async_client.h>
@@ -8,25 +8,25 @@
 #include <iostream>
 #include <cstring>
 
-class MqttIface
+#include "utils.hpp"
+
+class MqttIface : public Utils
 {
 public:
 	callback cb;
 
-    MqttIface(const std::string& broker_url, const std::string& pub_topic_name,
-    			const std::string& cli_id, int qos, int interval, int time_out);
-			
+    MqttIface(const std::string& broker_url, const std::string& cli_id, int qos, int interval, int time_out);		
     bool ConnectBroker();
     void DisconnectBroker();
     bool IsConnected();
+    bool Yield();
     void Publish(const std::string& topic, const std::string& msg);
     void Subscribe(const std::string& topic);
-    std::string GetPubTopicName();
+    void Unsubscribe(const std::string& topic);
     ~MqttIface();
     
 private:
     mqtt::async_client* client;
-    std::string pub_topic_name;
     int qos;
     int time_out;
     int interval;

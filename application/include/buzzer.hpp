@@ -3,8 +3,9 @@
 
 #include <mutex>
 #include "ioctl_buzzer.h"
+#include "utils.hpp"
 
-class Buzzer
+class Buzzer : public Utils
 {
 public:
     Buzzer(const char* dev_path);

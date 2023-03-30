@@ -13,23 +13,21 @@ Oled::Oled(const char* dev_path)
 {
     if ((this->fd = open(dev_path, O_RDWR)) < 0)
     {
-        std::cout << dev_path << " Open Failed [" << strerror(errno) << "]" <<  std::endl;
+        ERR_LOG("{} {}", dev_path, strerror(errno));
     }
-
+    else
+    {   
+        INFO_LOG("{} open success", dev_path);
+    }
     memset(&oled_ioctl, 0x0, sizeof(ioctl_oled_t));
-}
-
-void Oled::WriteDisplay(std::vector<char> data, const uint8_t line_no, const uint8_t cursor_pos)
-{
-    for (auto ir = data.begin(); ir != data.end(); ++ir)
-    {
-        std::cout << *ir << " ";
-    }
-    std::cout << std::endl;
 }
 
 void Oled::WriteDisplay(const char* data, const uint8_t line_no, const uint8_t cursor_pos)
 {
+    DEBUG_LOG("data : {}", data);
+    DEBUG_LOG("line_no : {}", line_no);
+    DEBUG_LOG("cursor_pos : {}", cursor_pos);
+
     this->oled_mutex.lock();
     memset(&oled_ioctl.str, 0x0, sizeof(oled_ioctl.str));
 
@@ -53,5 +51,6 @@ Oled::~Oled()
     if (this->fd)
     {
         close(this->fd);
+        INFO_LOG("close success");
     }
 }

@@ -12,10 +12,12 @@ class callback : public virtual mqtt::callback
     {
 	    std::cout << "connection_lost!" << std::endl;
     }
+
     virtual void delivery_complete(mqtt::delivery_token_ptr tok) override
     {
 	    std::cout << "delivery_complete!" << std::endl;
     }
+
     virtual void message_arrived(mqtt::const_message_ptr msg) override
     {
 	    std::cout << "message_arrived!" << std::endl;
@@ -33,23 +35,30 @@ class callback : public virtual mqtt::callback
 	{
 		return this->msg;
 	}
+
+	void ClearSubTopicMsg()
+	{
+		this->new_msg_arrived = false;
+		this->msg.clear();
+	}
 	
  private:
  	std::string msg;
- 	bool new_msg_arrived; 
+ 	bool new_msg_arrived = false; 
 };
 
 
-class my_iaction_listener : public virtual mqtt::iaction_listener
+class SubscribeCallback : public virtual mqtt::iaction_listener
 {
+public:
     void on_failure(const mqtt::token& tok) override
     {
-    	std::cout << "Mqtt Filed" << std::endl;
+    	std::cout << "Mqtt subscribe failed" << tok.get_message_id() << std::endl;
     }
     
     void on_success(const mqtt::token& tok) override
     {
-    	std::cout << "Mqtt Success" << std::endl;
+    	std::cout << "Mqtt subscribe success" << tok.get_message_id() << std::endl;
     }    
 };
 

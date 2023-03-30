@@ -2,14 +2,15 @@
 #define OLED_H
 
 #include <mutex>
+#include <vector>
+
+#include "utils.hpp"
 #include "ioctl_oled.h"
 
-#include <vector>
-class Oled
+class Oled : public Utils
 {
 public:
     Oled(const char* dev_path);
-    void WriteDisplay(std::vector<char>, const uint8_t, const uint8_t);
     void WriteDisplay(const char *, const uint8_t, const uint8_t);
     void ClearDisplay(void);
     ~Oled();

@@ -13,7 +13,11 @@ Buzzer::Buzzer(const char* dev_path)
 {
     if ((this->fd = open(dev_path, O_RDWR)) < 0)
     {
-        std::cout << dev_path << " Open Failed [" << strerror(errno) << "]" <<  std::endl;
+        ERR_LOG("{} {}", dev_path, strerror(errno));
+    }
+    else
+    {   
+        INFO_LOG("{} open success", dev_path);
     }
 }
 
@@ -43,5 +47,6 @@ Buzzer::~Buzzer()
     if (this->fd)
     {
         close(this->fd);
+        INFO_LOG("close success");
     }
 }

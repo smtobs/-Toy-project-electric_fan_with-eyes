@@ -2,31 +2,30 @@
 #include "mqtt/iaction_listener.h"
 #include "mqtt/client.h"
 
-MqttIface::MqttIface(const std::string& broker_url, const std::string& pub_topic_name_, const std::string& cli_id,
-			int qos, int interval, int time_out)
+MqttIface::MqttIface(const std::string& broker_url, const std::string& cli_id, int qos, int interval, int time_out)
 {
     this->client         = new mqtt::async_client(broker_url, cli_id);
     this->qos            = qos;
     this->time_out       = time_out;
     this->interval       = interval;
-    this->pub_topic_name = pub_topic_name_;
 
     this->client->set_callback(this->cb);
 }
 
 bool MqttIface::ConnectBroker()
 {
+    mqtt::connect_options conn_opts;
+    conn_opts.set_keep_alive_interval(this->interval);
+    conn_opts.set_clean_session(true);
     try
     {   
-        mqtt::connect_options conn_opts;
-        conn_opts.set_keep_alive_interval(this->interval);
-        //conn_opts.set_clean_session(true);
         mqtt::token_ptr conntok = this->client->connect(conn_opts);
         conntok->wait_for(this->time_out);
     }
+
     catch (const mqtt::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        ERR_LOG("{}", e.what());
         return false;
     }
     return true;
@@ -40,13 +39,33 @@ void MqttIface::DisconnectBroker()
     }
     catch (const mqtt::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        ERR_LOG("{}", e.what());
     }
 }
 
 bool MqttIface::IsConnected()
 {
 	return client->is_connected();
+}
+
+bool MqttIface::Yield()
+{
+    if (this->IsConnected() == false)
+    {
+        if (this->ConnectBroker() == true)
+        {
+            INFO_LOG("Connect broker");
+        }
+        else
+        {
+            INFO_LOG("Failed connection broker");
+        }
+    }
+    else
+    {
+        return this->cb.IsMsgArrived();
+    }
+    return false;
 }
 
 void MqttIface::Publish(const std::string& topic, const std::string& msg)
@@ -61,19 +80,13 @@ void MqttIface::Publish(const std::string& topic, const std::string& msg)
     }
     catch (const mqtt::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        ERR_LOG("{}", e.what());
     }
-}
-
-std::string MqttIface::GetPubTopicName()
-{
-	return this->pub_topic_name;
 }
 
 void MqttIface::Subscribe(const std::string& topic)
 {
-    my_iaction_listener listenr;
-
+    SubscribeCallback listenr;
     try
     {
         mqtt::token_ptr subtok = client->subscribe(topic, 1, nullptr, listenr);
@@ -82,7 +95,24 @@ void MqttIface::Subscribe(const std::string& topic)
     }
     catch(const mqtt::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        ERR_LOG("{}", e.what());
+	    return;
+    }
+}
+
+void MqttIface::Unsubscribe(const std::string& topic)
+{
+	mqtt::properties props;
+    try
+    {
+        mqtt::token_ptr unsub_ok = client->unsubscribe(topic, props);
+        unsub_ok->wait();
+        this->client->stop_consuming();
+    }
+    catch(const mqtt::exception& e)
+    {
+        ERR_LOG("{}", e.what());
+	    return;
     }
 }
 

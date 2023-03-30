@@ -2,14 +2,16 @@
 #include "timer_callback.hpp"
 #include "signal_callback.hpp"
 
-EventDriven::EventDriven(const YAML::Node& config)
+EventDriven::EventDriven(ConfigManager& config)
 {
-    this->pool    = new ThreadPool(3);
+    this->pool    = new ThreadPool(config.GetConfigVal("THREAD_POOL", "NUM", config.int_val));
     this->handle  = new EventHandler(config);
     
     this->event_loop = ev_default_loop(0);
     TimerCallBack::RegisterTimer(this);
     SigCallBack::RegisterSignal(this);
+
+    INFO_LOG("Create..");
 }
 
 void EventDriven::StartEventLoop()
@@ -22,7 +24,7 @@ void EventDriven::StartEventLoop()
     }
     else
     {
-        std::cout << "An event loop is already running." << std::endl;
+        ERR_LOG("An event loop is already running.");
     }
 }
 
@@ -71,43 +73,26 @@ void EventDriven::NetworkTimerHandler(struct ev_loop *loop, ev_timer *w, int rev
     static uint8_t cnt[MAX_NETWORK_EVENT] = {0u,};
     uint16_t event_flag = 0x0;
 
-    if ((++cnt[BROKER_RETRY_CON_EVENT]) >= BROKER_RETRY_CON_EVENT_PERIOD)
+    if ((++cnt[MQTT_YIELD_EVENT]) >= MQTT_YIELD_EVENT_PERIOD)
     {
-       event_flag |= 1u << BROKER_RETRY_CON_EVENT;
-       cnt[BROKER_RETRY_CON_EVENT] = 0u;
+       event_flag |= 1u << MQTT_YIELD_EVENT;
+       cnt[MQTT_YIELD_EVENT] = 0u;
     }
 
-  //  if ((++cnt[GET_WIFI_SIG_EVENT]) >= GET_WIFI_SIG_EVENT_PERIOD)
-    //{
-      // event_flag |= 1u << GET_WIFI_SIG_EVENT;
-   // }
     pool->Enqueue(boost::bind(&EventDriven::NetworkEventListener, this, event_flag));
 }
 
 void EventDriven::NetworkEventListener(uint16_t event_flag)
 {
-    if (event_flag & (1u << BROKER_RETRY_CON_EVENT))
+    if (event_flag & (1u << MQTT_YIELD_EVENT))
     {
-        handle->RetryConBrokerHandler();
+        handle->MqttYieldEventHandler();
     }
-
-    //if (event_flag & (1u << GET_WIFI_SIG_EVENT))
-    //{
-        //this->RenewScreenTimeHandler();
-    //}
-}
-
-void EventDriven::StartTimer()
-{
-
-}
-void EventDriven::StopTimer()
-{
-
 }
 
 EventDriven::~EventDriven()
 {
     delete this->pool;
     delete this->handle;
+    INFO_LOG("Delete..");
 }

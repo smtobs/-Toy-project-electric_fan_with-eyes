@@ -6,9 +6,11 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
+#include "utils.hpp"
+
 using namespace boost;
 
-class ThreadPool
+class ThreadPool : public Utils
 {
 public:
     ThreadPool(size_t num_threads) : work_(io_service_)
@@ -16,6 +18,7 @@ public:
         for (size_t i = 0; i < num_threads; ++i)
         {
             threads_.create_thread(boost::bind(&asio::io_service::run, &io_service_));
+            INFO_LOG("{} Thread create..", i);
         }
     }
 
@@ -29,6 +32,7 @@ public:
     {
         io_service_.stop();
         threads_.join_all();
+        INFO_LOG("Delete..");
     }
 
 private:

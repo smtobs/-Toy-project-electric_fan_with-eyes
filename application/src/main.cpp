@@ -3,25 +3,24 @@
 #include <unistd.h>
 #include <cassert>
 
-#include "yaml-cpp/yaml.h"
 #include "utils.hpp"
 #include "event_driven.hpp"
+#include "config_manager.hpp"
 
-class Core
+class Core : public Utils
 {
 public:
     Core(int argc, char **argv) : argc_(argc), argv_(argv)
     {
         assert(this->OptionHandler() != false);
 
-        YAML::Node& config = const_cast<YAML::Node&>(this->config);
-        config = YAML::LoadFile(this->GetConfigPath());
-
-        this->ev_driven = new EventDriven(config);
+        config = new ConfigManager(this->GetConfigPath());
+        this->ev_driven = new EventDriven(*config);
     }
 
     ~Core()
     {
+        delete this->config;
         delete this->ev_driven;
     }
 
@@ -42,17 +41,18 @@ public:
     
 private:
     EventDriven* ev_driven;
-    mutable YAML::Node config;
+    ConfigManager* config;
     std::string config_path;
     int argc_;
     char** argv_;
 
-    void Help(const char* cmd)
+    void Help()
     {
         std::fprintf(stderr, "Usage : [-d -f Config File Name]\n");
         std::fprintf(stderr, "  -d,         Background\n");
         std::fprintf(stderr, "  -f,         Config file path\n");
         std::fprintf(stderr, "  -h,         Help\n\n");
+        
     }
 
     bool OptionHandler()
@@ -82,7 +82,7 @@ private:
 
                 case 'h':
                 {
-                    this->Help(optarg);
+                    this->Help();
                     return false;
                 }
 
@@ -104,3 +104,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+

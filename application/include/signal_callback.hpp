@@ -13,13 +13,13 @@ namespace SigCallBack
 	{    
 		g_event = event;
 		std::signal(SIGINT, CallBackExit);
-    	std::signal(SIGTERM, CallBackExit);
+		std::signal(SIGTERM, CallBackExit);
 	}
 }
 
 static void CallBackExit(int signum)
 {
-	if (SIGINT || SIGTERM)
+	if (signum == SIGINT || signum == SIGTERM)
 	{
 		SigCallBack::g_event->StopEventLoop();
 	}

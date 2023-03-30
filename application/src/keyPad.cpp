@@ -12,7 +12,11 @@ KeyPad::KeyPad(const char* dev_path)
 {
     if ((this->fd = open(dev_path, O_RDWR)) < 0)
     {
-        std::cout << dev_path << " Open Failed [" << strerror(errno) << "]" <<  std::endl;
+        ERR_LOG("{} {}", dev_path, strerror(errno));
+    }
+    else
+    {   
+        INFO_LOG("{} open success", dev_path);
     }
 }
 
@@ -44,12 +48,11 @@ char KeyPad::Scan()
         return '\0';
     }
     
-    std::cout << "buff : " << push_button << std::endl;
+    DEBUG_LOG("Keypad Input : {}", push_button);
 
     if ((push_button[0] !='A') &&
         (push_button[0] != 'B') &&
         (push_button[0] != 'C') &&
-        //(push_button[0] != '@') &&
         (push_button[0] != 'D'))
     {
         this->buff.push_back(push_button[0]);
@@ -62,5 +65,6 @@ KeyPad::~KeyPad()
     if (this->fd)
     {
         close(this->fd);
+        INFO_LOG("close success");
     }
 }

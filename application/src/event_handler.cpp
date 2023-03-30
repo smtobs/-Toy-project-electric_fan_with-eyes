@@ -2,35 +2,46 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-EventHandler::EventHandler(const YAML::Node &config)
+EventHandler::EventHandler(ConfigManager& config_)
 {
-    std::string ret_config = config["DRIVERS"]["BUZZER_PATH"].as<std::string>();
+    config = &config_;
+
+    int int_val         = config->int_val;
+    std::string str_val = config->str_val;
+
+    std::string ret_config = config->GetConfigVal("DRIVERS", "BUZZER_PATH", str_val);
     buzzer         = new Buzzer(ret_config.c_str());
       
-    ret_config = config["DRIVERS"]["KEYPAD_PATH"].as<std::string>();
+    ret_config = config->GetConfigVal("DRIVERS", "KEYPAD_PATH", str_val);
     key_pad        = new KeyPad(ret_config.c_str());
     
-    ret_config    = config["DRIVERS"]["OLED_PATH"].as<std::string>();
+    ret_config     = config->GetConfigVal("DRIVERS", "OLED_PATH", str_val);
     oled           = new Oled(ret_config.c_str());
     
-    sys_mgr        = new SystemManager();
-    mqtt_iface     = new MqttIface(config["MQTT"]["DOOR"]["BROKER_URL"].as<std::string>(),
-    					config["MQTT"]["DOOR"]["PUB_TOPIC_NAME"].as<std::string>(),
-    					config["MQTT"]["DOOR"]["CLI_ID"].as<std::string>(),
-    					config["MQTT"]["DOOR"]["QOS"].as<int>(), 
-    					config["MQTT"]["DOOR"]["INTERVAL"].as<int>(),
-    					config["MQTT"]["DOOR"]["TIME_OUT"].as<int>());
+    sys_mgr        = new SystemManager(config_);
+
+    mqtt_iface     = new MqttIface(config->GetConfigVal("MQTT", "BROKER_URL", str_val),
+                                    config->GetConfigVal("MQTT", "CLI_ID", str_val),
+                                    config->GetConfigVal("MQTT", "QOS", int_val), 
+                                    config->GetConfigVal("MQTT", "INTERVAL", int_val),
+                                    config->GetConfigVal("MQTT", "TIME_OUT", int_val));
+
+    image_sender   = new ImageSender(config->GetConfigVal("VIDEO", "READ_PATH", str_val),
+                                config->GetConfigVal("VIDEO", "DEST_IP", str_val),
+                                config->GetConfigVal("VIDEO", "DEST_PORT", int_val),
+                                config->GetConfigVal("VIDEO", "IMG_WIDTH", int_val),
+                                config->GetConfigVal("VIDEO", "IMG_HEIGHT", int_val));
 
     this->LockDisplay(0UL);
-	
-    std::cout << "Create EventHandler" << std::endl;
+
+    INFO_LOG("Create eventHandler");
 }
 
 void EventHandler::KeypadEventHandler()
 {
     if ((sys_mgr->IsTimeDiff(sys_mgr->GetTick(), this->prev_display_lock_tm, this->display_lock_tm)) == false)
     {
-        std::cout << "tiemr...." << std::endl;
+        DEBUG_LOG("keypad lock..");
         return;
     }
     else
@@ -61,7 +72,7 @@ void EventHandler::KeypadEventHandler()
             }
             else
             {
-				this->FailPwEvent();
+                this->FailPwEvent();
             }
             break;
 
@@ -86,7 +97,14 @@ void EventHandler::IntercomEvent()
     this->LockDisplay(10000UL);
     oled->ClearDisplay();                 
     oled->WriteDisplay("Requesting permission to enter..\n", 3, 1);
-    video->SendImgCamera(video->read_image, video->destination);
+    
+    std::string dest_ip = config->GetConfigVal("VIDEO", "DEST_IP", config->str_val);
+    image_sender->SendImage(dest_ip.c_str(),
+                            config->GetConfigVal("VIDEO", "DEST_PORT", config->int_val),
+                            config->GetConfigVal("VIDEO", "IMG_WIDTH", config->int_val),
+                            config->GetConfigVal("VIDEO", "IMG_HEIGHT", config->int_val));
+
+    mqtt_iface->Subscribe(config->GetConfigVal("MQTT", "SUB_TOPIC_NAME", config->str_val));
 }
 
 void EventHandler::RenewScreenTimeHandler()
@@ -94,40 +112,24 @@ void EventHandler::RenewScreenTimeHandler()
     oled->WriteDisplay(sys_mgr->GetLocalTime(), 0, 0);
 }
 
-void EventHandler::RetryConBrokerHandler()
+void EventHandler::MqttYieldEventHandler()
 {
-    static bool is_sub_topic = false; 
-    if (mqtt_iface->IsConnected() == false)
+    bool is_msg = mqtt_iface->Yield();
+    if (is_msg)
     {
-        //mqtt_iface->DisconnectBroker();
-        mqtt_iface->ConnectBroker();
-        std::cout << "Try Connection Broker" << std::endl;
-        is_sub_topic = false;
-    }
-    else
-    {
-    	if (is_sub_topic == false)
-    	{
-            mqtt_iface->Subscribe("/home/access");
-            is_sub_topic = true;
-    	}
-    	else
-    	{
-    		if (mqtt_iface->cb.IsMsgArrived() == true)
-    		{
-    			std::string topic_msg = mqtt_iface->cb.GetSubTopicMsg();
-    			mqtt_iface->cb.ClearSubTopicMsg();
-
-                if (this->IsEqual(topic_msg, "allow"))
-                {
-                    this->AllowAccessEvent();
-                }
-                else if (this->IsEqual(topic_msg, "deny"))
-                {
-                    this->DenyAccessEvent();
-                }
-    		}
-    	}
+        std::string topic_msg = mqtt_iface->cb.GetSubTopicMsg();
+        mqtt_iface->cb.ClearSubTopicMsg();
+        
+        if (this->IsEqual(topic_msg, static_cast<std::string>("allow")))
+        {
+            this->AllowAccessEvent();
+            mqtt_iface->Unsubscribe(config->GetConfigVal("MQTT", "SUB_TOPIC_NAME", config->str_val));
+        }
+        else if (this->IsEqual(topic_msg, static_cast<std::string>("deny")))
+        {
+            this->DenyAccessEvent();
+            mqtt_iface->Unsubscribe(config->GetConfigVal("MQTT", "SUB_TOPIC_NAME", config->str_val));
+        }
     }
 }
 
@@ -157,14 +159,14 @@ void EventHandler::FailPwEvent()
 
 void EventHandler::AllowAccessEvent()
 {
-	this->LockDisplay(5000UL);
+    this->LockDisplay(5000UL);
     this->ClearEvent();
-	this->OpenDoor();
+    this->OpenDoor();
 }
 
 void EventHandler::DenyAccessEvent()
 {
-	this->LockDisplay(3000UL);
+    this->LockDisplay(3000UL);
     this->ClearEvent();
     oled->WriteDisplay("Access Denied\n", 4, 17);
     this->RenewScreenTimeHandler();	
@@ -173,7 +175,7 @@ void EventHandler::DenyAccessEvent()
 void EventHandler::OpenDoor()
 {
     oled->WriteDisplay("The door opens.\n", 4, 20);
-    mqtt_iface->Publish(mqtt_iface->GetPubTopicName(), this->CreateOpenDoorMsg());
+    mqtt_iface->Publish(config->GetConfigVal("MQTT", "PUB_TOPIC_NAME", config->str_val), this->CreateOpenDoorMsg());
     buzzer->SuccessSound();
 }
 
@@ -228,6 +230,7 @@ EventHandler::~EventHandler()
     delete oled;
     delete sys_mgr;
     delete mqtt_iface;
+    delete image_sender;
 
-    std::cout << "Delete EventHandler" << std::endl;
+    INFO_LOG("Delete eventHandler..");
 }

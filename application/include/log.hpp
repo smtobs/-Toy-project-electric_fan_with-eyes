@@ -7,11 +7,12 @@
 #include <spdlog/async.h>
 #include <libgen.h>
 
-class LoggerRegistry {
+class LoggerRegistry
+{
 public:
     using Map = std::map<std::string, std::atomic<spdlog::level::level_enum> >;
 private:
-    const size_t MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024 * 1024; // 1 GB
+    const size_t MAX_FILE_SIZE_BYTES = 1 * 1024; // 1KB
     const size_t MAX_NUM_FILES = 10;
     const size_t QUEUE_SIZE = std::pow(2, 20);
     const std::string APP_FILE_NAME = "./application.log";
@@ -26,7 +27,8 @@ private:
     Map loggers_;
     std::mutex mtx_;
 
-    explicit LoggerRegistry() {
+    explicit LoggerRegistry()
+    {
         static_assert(spdlog::level::trace < spdlog::level::debug);
         static_assert(spdlog::level::debug < spdlog::level::info);
         static_assert(spdlog::level::info < spdlog::level::warn);
@@ -39,30 +41,34 @@ private:
         appLogger_ = spdlog::rotating_logger_mt("logger", APP_FILE_NAME, MAX_FILE_SIZE_BYTES , MAX_NUM_FILES);
         //appLogger_ = spdlog::basic_logger_mt("logger", APP_FILE_NAME);
         
-        appLogger_->set_level(spdlog::level::debug);
+        appLogger_->set_level(spdlog::level::info);
         appLogger_->set_pattern(APP_PATTERN_STRING);
 
         accessLogger_ = spdlog::rotating_logger_mt("accessLogger", ACCESS_FILE_NAME, MAX_FILE_SIZE_BYTES , MAX_NUM_FILES);
-        accessLogger_->set_level(spdlog::level::debug);
+        accessLogger_->set_level(spdlog::level::info);
         accessLogger_->set_pattern(ACCESS_PATTERN_STRING);
     }
 
 
 public:
-    static LoggerRegistry& getInstance() {
+    static LoggerRegistry& getInstance()
+    {
         static LoggerRegistry instance;
         return instance;
     }
 
-    void setLogLevel(spdlog::level::level_enum logLevel) {
+    void setLogLevel(spdlog::level::level_enum logLevel)
+    {
         appLogger_->set_level(logLevel);
     }
 
-    spdlog::level::level_enum getLogLevel() {
+    spdlog::level::level_enum getLogLevel()
+    {
         return appLogger_->level();
     }
 
-    void setLogLevel(std::string& loggerName, spdlog::level::level_enum level) {
+    void setLogLevel(std::string& loggerName, spdlog::level::level_enum level)
+    {
         std::lock_guard<std::mutex> lock(mtx_);
         auto iterator = loggers_.find(loggerName);
 
@@ -72,26 +78,31 @@ public:
         iterator->second.store(level, std::memory_order_relaxed);
     }
 
-    spdlog::level::level_enum getLogLevel(std::string& loggerName) {
+    spdlog::level::level_enum getLogLevel(std::string& loggerName)
+    {
         std::lock_guard<std::mutex> lock(mtx_);
         auto iterator = loggers_.find(loggerName);
 
-        if (iterator == loggers_.end()) {
+        if (iterator == loggers_.end())
+        {
             throw std::runtime_error(loggerName + "LoggerName not registered.");
         }
         return iterator->second.load(std::memory_order_relaxed);
     }
 
-    Map::iterator registerLogger(char* loggerName) {
+    Map::iterator registerLogger(char* loggerName)
+    {
         std::lock_guard<std::mutex> lock(mtx_);
         return loggers_.emplace(loggerName, appLogger_->level()).first;
     }
 
-    spdlog::logger& getAppLogger() {
+    spdlog::logger& getAppLogger()
+    {
         return *appLogger_;
     }
 
-    spdlog::logger& getAccessLogger() {
+    spdlog::logger& getAccessLogger()
+    {
         return *accessLogger_;
     }
 };

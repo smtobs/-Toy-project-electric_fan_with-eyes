@@ -3,22 +3,24 @@
 
 #include <cstdint>
 #include <atomic>
+#include <memory>
 
 #include "oled.hpp"
 #include "keyPad.hpp"
 #include "systemManager.hpp"
 #include "buzzer.hpp"
 #include "mqtt_iface.hpp"
-#include "video.hpp"
-#include "yaml-cpp/yaml.h"
+#include "image_sender.hpp"
+#include "config_manager.hpp"
+#include "utils.hpp"
 
 class EventHandler : public Utils
 {
 public:
-    EventHandler(const YAML::Node &config);
+    EventHandler(ConfigManager& config);
     void KeypadEventHandler();
     void RenewScreenTimeHandler();
-    void RetryConBrokerHandler();
+    void MqttYieldEventHandler();
     ~EventHandler();
 
 private:
@@ -27,7 +29,9 @@ private:
     Oled* oled;
     SystemManager* sys_mgr;
     MqttIface* mqtt_iface;   
-    Video* video; 
+    ImageSender* image_sender;
+    ConfigManager* config;
+
     std::atomic<unsigned char> pw_input_count;
     std::atomic<unsigned long> prev_display_lock_tm;
     std::atomic<unsigned long> display_lock_tm;

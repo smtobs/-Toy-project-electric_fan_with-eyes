@@ -1,28 +1,14 @@
 #include "systemManager.hpp"
+
 #include <string>
 #include <iostream>
 #include <openssl/sha.h>
 #include <cstring>
 #include <ctime>
 
-SystemManager::SystemManager()
+SystemManager::SystemManager(ConfigManager& config_) : config(&config_)
 {
-    MAX_PW = 128;
-}
-
-bool SystemManager::FindUnitNumber(std::vector<char> input_unit_num)
-{
-    std::vector<char> get_unit_num;
-
-    get_unit_num.push_back('1');
-    get_unit_num.push_back('2');
-    get_unit_num.push_back('3');
-    get_unit_num.push_back('4');
-    if (this->IsEqual(get_unit_num, input_unit_num))
-    {
-        return true;
-    }
-    return false;
+    INFO_LOG("Create..");
 }
 
 bool SystemManager::PwCompare(std::vector<char> input_pw)
@@ -38,8 +24,8 @@ bool SystemManager::PwCompare(std::vector<char> input_pw)
 std::vector<unsigned char> SystemManager::GetPw()
 {
 	std::vector<unsigned char> v;
-    unsigned char t[] = "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f"; // 1 2 3 4
-    v.insert(v.begin(), std::begin(t), std::end(t));
+    std::string pw = config->GetConfigVal("SYSTEM", "PW", config->str_val);
+    copy(pw.begin(), pw.end(), back_inserter(v));
 
     return  v;
 }
@@ -48,11 +34,11 @@ std::vector<unsigned char> SystemManager::EncryptionPw(char* pw)
 {
     SHA256_CTX context;
     unsigned char hash[SHA256_DIGEST_LENGTH];
-    char* salt = "5678";
+    std::string salt_ = config->GetConfigVal("SYSTEM", "SALT", config->str_val);
 
     SHA256_Init(&context);
     SHA256_Update(&context, (unsigned char*)pw, strlen(pw));
-    SHA256_Update(&context, (unsigned char*)salt, strlen(salt));
+    SHA256_Update(&context, (unsigned char*)salt_.c_str(), strlen(salt_.c_str()));
     SHA256_Final(hash, &context);
 
     char hashTransform[SHA256_DIGEST_LENGTH * 2 + 1] = {0,};
@@ -60,7 +46,7 @@ std::vector<unsigned char> SystemManager::EncryptionPw(char* pw)
     {
         snprintf(&hashTransform[i*2], SHA256_DIGEST_LENGTH * 2 + 1, "%02x", (unsigned int)hash[i]);
     }
-    std::vector<unsigned char> encryption_pw(hashTransform, hashTransform + strlen((const char *)hashTransform) + 1);
+    std::vector<unsigned char> encryption_pw(hashTransform, hashTransform + strlen((const char *)hashTransform));
     return encryption_pw;
 }
 
@@ -85,7 +71,7 @@ uint64_t SystemManager::GetTick(void)
     
     if (clock_gettime(CLOCK_MONOTONIC, &time_probe) == -1)
     {
-    	std::cout << "clock_gettime error "  << std::endl;
+        ERR_LOG("Clock_gettime error");
     }
     uint64_t time_ms = time_probe.tv_nsec / 1000000UL;
     time_ms = time_ms + (time_probe.tv_sec * 1000);
@@ -109,5 +95,6 @@ bool SystemManager::IsTimeDiff(unsigned long now, unsigned long prev, unsigned l
 
 SystemManager::~SystemManager()
 {
-
+    config = NULL;
+    INFO_LOG("Delete..");
 }
