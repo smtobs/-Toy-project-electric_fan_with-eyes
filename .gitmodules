@@ -1,3 +1,6 @@
 [submodule "door"]
 	path = door
 	url = https://github.com/smtobs/esp32_door
+[submodule "intercom"]
+	path = intercom
+	url = https://github.com/smtobs/qt_intercom
