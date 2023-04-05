@@ -9,7 +9,8 @@
 #include <linux/slab.h>
 #include <asm/io.h>
 
-#include "../lib/ioctl/ioctl_buzzer.h"
+#include "../../lib/ioctl/ioctl_buzzer.h"
+//#include "ioctl_buzzer.h"
 #include "buzzer.h"
 
 #define DEVICE_MAJOR_NUM                    0

@@ -1,41 +1,34 @@
 KERNDIR=/lib/modules/$(shell uname -r)/build
 PWD=$(shell pwd)
 
+BASE_DIR=/home/bsoh/access_control_system
 
-CFLAGS_KERNEL := -I /home/bsoh/toy_project_smart_home/lib/ioctl
+CFLAGS_KERNEL := -I $(BASE_DIR)
 CFLAGS += -D__KERNEL__ -DKERNEL_5_15 $(CFLAGS_KERNEL)
-CFLAGS += -I $(PWD) -I /home/bsoh/toy_project_smart_home/lib/ioctl
+CFLAGS += -I $(PWD) -I $(BASE_DIR)
+
+BUZZER_DIR=buzzer_driver
+OLED_DIR=oled_driver
+KEYPAD_DIR=keypad_driver
 
 KEYPAD_MODULE=keypad-module
 BUZZER_MODULE=buzzer-module
 OLED_MODULE=oled-module
-PWM_DIR=PWM
-BUZZER_DIR=BUZZER
 
 all:
+	make -C $(OLED_DIR)
+	make -C $(BUZZER_DIR)
+	make -C $(KEYPAD_DIR)
 	make -C $(KERNDIR) M=$(PWD) modules
 
 clean:
+	make -C $(OLED_DIR) clean
+	make -C $(BUZZER_DIR) clean
+	make -C $(KEYPAD_DIR) clean
 	make -C $(KERNDIR) M=$(PWD) clean
-	rm -rf *.ko
-	rm -rf *.o
+
 install:
-	sudo insmod $(OLED_MODULE).ko
-	sudo insmod $(BUZZER_MODULE).ko
-	sudo insmod $(KEYPAD_MODULE).ko
+	sudo insmod $(OLED_DIR)/$(OLED_MODULE).ko
+	sudo insmod $(BUZZER_DIR)/$(BUZZER_MODULE).ko
+	sudo insmod $(KEYPAD_DIR)/$(KEYPAD_MODULE).ko
 
-$(KEYPAD_MODULE)-y := \
-	keyPad.o
-
-$(BUZZER_MODULE)-y := \
-	module_buzzer.o \
-	buzzer.o \
-	pwm.o
-
-$(OLED_MODULE)-y := \
-	module_oled.o \
-	ssd1306.o \
-	linux_custom_spi.o \
-	linux_custom_gpio.o 
-
-obj-m = $(KEYPAD_MODULE).o $(BUZZER_MODULE).o $(OLED_MODULE).o

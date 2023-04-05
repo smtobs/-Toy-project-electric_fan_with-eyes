@@ -1,7 +1,7 @@
 #ifndef _PWM_H_
 #define _PWM_H_
 
-#include "util.h"
+#include "../common/util.h"
 
 struct pwm_private_t;
 

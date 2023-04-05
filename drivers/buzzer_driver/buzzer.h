@@ -1,8 +1,8 @@
 #ifndef _BUZZER_H_
 #define _BUZZER_H_
 
-#include "pwm.h"
-#include "util.h"
+#include "../pwm_driver/pwm.h"
+#include "../common/util.h"
 
 typedef struct buzzer_obj_t
 {

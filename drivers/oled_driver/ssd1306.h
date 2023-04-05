@@ -1,7 +1,7 @@
 #ifndef _SSD1306_H_
 #define _SSD1306_H_
 
-#include "util.h"
+#include "../common/util.h"
 
 #define SPI_BUS_NUM             (  1 )    // SPI 1
 #define SSD1306_RST_PIN         (  26 )   // Reset pin

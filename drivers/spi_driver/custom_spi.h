@@ -1,7 +1,7 @@
 #ifndef _CUSTOM_SPI_H_
 #define _CUSTOM_SPI_H_
 
-#include "util.h"
+#include "../common/util.h"
 
 #define SPI_MODE0     (0)
 #define SPI_MODE1     (1)

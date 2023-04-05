@@ -1,7 +1,7 @@
 #ifndef _CUSTOM_GPIO_H_
 #define _CUSTOM_GPIO_H_
 
-#include "util.h"
+#include "../common/util.h"
 
 
 #define GPIO_HIGH       ( 1 )

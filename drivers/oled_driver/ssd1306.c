@@ -1,5 +1,5 @@
-#include "custom_gpio.h"
-#include "custom_spi.h"
+#include "../gpio_driver/custom_gpio.h"
+#include "../spi_driver/custom_spi.h"
 #include "ssd1306.h"
 
 static gpio_obj_t gpio;

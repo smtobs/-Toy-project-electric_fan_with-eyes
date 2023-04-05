@@ -6,10 +6,9 @@
 #include <asm/io.h>
 
 #include "ssd1306.h"
-#include "util.h"
+#include "../common/util.h"
 #include "logo.h"
-#include "../lib/ioctl/ioctl_oled.h"
-//#include "ioctl_oled.h"
+#include "../../lib/ioctl/ioctl_oled.h"
 
 #define DEVICE_MAJOR_NUM                    0
 #define DEV_NAME                            "/dev/oled"
