@@ -4,3 +4,6 @@
 [submodule "intercom"]
 	path = intercom
 	url = https://github.com/smtobs/qt_intercom
+[submodule "lobby_phone/lib/rapidjson"]
+	path = lobby_phone/lib/rapidjson
+	url = https://github.com/Tencent/rapidjson
