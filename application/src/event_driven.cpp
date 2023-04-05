@@ -4,11 +4,19 @@
 
 EventDriven::EventDriven(ConfigManager& config)
 {
+    /* Create Thread pool */
     this->pool    = new ThreadPool(config.GetConfigVal("THREAD_POOL", "NUM", config.int_val));
+
+    /* Create Event handler */
     this->handle  = new EventHandler(config);
     
+    /* Setting Event Loop */
     this->event_loop = ev_default_loop(0);
+
+    /* Register Timer */
     TimerCallBack::RegisterTimer(this);
+
+    /* Register Signal */
     SigCallBack::RegisterSignal(this);
 
     INFO_LOG("Create..");
@@ -18,6 +26,7 @@ void EventDriven::StartEventLoop()
 {
     if (this->is_event_loop_running == false)
     {
+        /* Start Event Loop & Timer */
         ev_timer_start(this->event_loop, &this->device_timer);
         ev_timer_start(this->event_loop, &this->network_timer);
         ev_loop(this->event_loop, 0);

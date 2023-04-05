@@ -38,24 +38,29 @@ void KeyPad::BuffCler()
 char KeyPad::Scan()
 {
     char push_button[2] = {0,};
-
     this->keypad_mutex.lock();
     read(fd, push_button, sizeof(push_button));
     this->keypad_mutex.unlock();
     
-    if (push_button[0] == '\0')
-    {
-        return '\0';
-    }
-    
     DEBUG_LOG("Keypad Input : {}", push_button);
 
-    if ((push_button[0] !='A') &&
-        (push_button[0] != 'B') &&
-        (push_button[0] != 'C') &&
-        (push_button[0] != 'D'))
+    /* Check Event Button */
+    if ((push_button[0] != static_cast<char>(KeyPad::Data::PASSWORD)) &&
+        (push_button[0] != static_cast<char>(KeyPad::Data::CLEAR)) &&
+        (push_button[0] != static_cast<char>(KeyPad::Data::CALL)))
     {
-        this->buff.push_back(push_button[0]);
+        if ((push_button[0] >= '0' && push_button[0] <= '9'))
+        {
+            this->buff.push_back(push_button[0]);
+        }
+        else if ((push_button[0] == '*') || (push_button[0] == '#'))
+        {
+            this->buff.push_back(push_button[0]);
+        }
+        else /* Invalid data */
+        {
+            return static_cast<char>(KeyPad::Data::INVALID);
+        }
     }
     return push_button[0];
 }

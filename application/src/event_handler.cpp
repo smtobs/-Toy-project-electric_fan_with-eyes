@@ -9,23 +9,29 @@ EventHandler::EventHandler(ConfigManager& config_)
     int int_val         = config->int_val;
     std::string str_val = config->str_val;
 
+    /* Buzzer Driver Open */
     std::string ret_config = config->GetConfigVal("DRIVERS", "BUZZER_PATH", str_val);
     buzzer         = new Buzzer(ret_config.c_str());
       
+    /* Keypad Driver Open */
     ret_config = config->GetConfigVal("DRIVERS", "KEYPAD_PATH", str_val);
     key_pad        = new KeyPad(ret_config.c_str());
     
+    /* Oled Driver Open */
     ret_config     = config->GetConfigVal("DRIVERS", "OLED_PATH", str_val);
     oled           = new Oled(ret_config.c_str());
     
+    /* Create System Manager */
     sys_mgr        = new SystemManager(config_);
 
+    /* Create Mqtt Interface */
     mqtt_iface     = new MqttIface(config->GetConfigVal("MQTT", "BROKER_URL", str_val),
                                     config->GetConfigVal("MQTT", "CLI_ID", str_val),
                                     config->GetConfigVal("MQTT", "QOS", int_val), 
                                     config->GetConfigVal("MQTT", "INTERVAL", int_val),
                                     config->GetConfigVal("MQTT", "TIME_OUT", int_val));
 
+    /* Create image_sender */
     image_sender   = new ImageSender(config->GetConfigVal("VIDEO", "READ_PATH", str_val),
                                 config->GetConfigVal("VIDEO", "DEST_IP", str_val),
                                 config->GetConfigVal("VIDEO", "DEST_PORT", int_val),
@@ -39,6 +45,7 @@ EventHandler::EventHandler(ConfigManager& config_)
 
 void EventHandler::KeypadEventHandler()
 {
+    /* Check Keypad Lock*/
     if ((sys_mgr->IsTimeDiff(sys_mgr->GetTick(), this->prev_display_lock_tm, this->display_lock_tm)) == false)
     {
         DEBUG_LOG("keypad lock..");
@@ -55,17 +62,18 @@ void EventHandler::KeypadEventHandler()
         }
     }
 
+    /* Check Keypad Input */
     char keypad_data[2] = {key_pad->Scan(), 0};
-    switch (keypad_data[0])
+    switch (static_cast<KeyPad::Data>(keypad_data[0]))
     {
-        case NULL_DATA:
+        case KeyPad::Data::INVALID:
             break;
 
-        case CALL:
+        case KeyPad::Data::CALL:
             this->IntercomEvent();
             break;
 
-        case PASSWORD:
+        case KeyPad::Data::PASSWORD:
             if (sys_mgr->PwCompare(key_pad->BuffCpy()))
             {
                 this->SuccessPwEvent();
@@ -76,7 +84,7 @@ void EventHandler::KeypadEventHandler()
             }
             break;
 
-        case CLEAR:
+        case KeyPad::Data::CLEAR:
             this->ClearEvent();
             this->InitDisplay();
             buzzer->ButtonPushSound();
@@ -88,6 +96,10 @@ void EventHandler::KeypadEventHandler()
                 this->WritePasswordOnDisplay(keypad_data);
                 buzzer->ButtonPushSound();
             }
+            else
+            {
+                buzzer->FailSound();
+            }
             break;
     }
 }
@@ -98,12 +110,14 @@ void EventHandler::IntercomEvent()
     oled->ClearDisplay();                 
     oled->WriteDisplay("Requesting permission to enter..\n", 3, 1);
     
+    /* Send Image */
     std::string dest_ip = config->GetConfigVal("VIDEO", "DEST_IP", config->str_val);
     image_sender->SendImage(dest_ip.c_str(),
                             config->GetConfigVal("VIDEO", "DEST_PORT", config->int_val),
                             config->GetConfigVal("VIDEO", "IMG_WIDTH", config->int_val),
                             config->GetConfigVal("VIDEO", "IMG_HEIGHT", config->int_val));
 
+    /* Topic subscribe */
     mqtt_iface->Subscribe(config->GetConfigVal("MQTT", "SUB_TOPIC_NAME", config->str_val));
 }
 
@@ -120,6 +134,7 @@ void EventHandler::MqttYieldEventHandler()
         std::string topic_msg = mqtt_iface->cb.GetSubTopicMsg();
         mqtt_iface->cb.ClearSubTopicMsg();
         
+        /* Open Door */
         if (this->IsEqual(topic_msg, static_cast<std::string>("allow")))
         {
             this->AllowAccessEvent();
@@ -145,6 +160,7 @@ void EventHandler::SuccessPwEvent()
     this->LockDisplay(5000UL);
     oled->ClearDisplay();                 
     oled->WriteDisplay("Correct Password.\n", 3, 14);
+    this->RenewScreenTimeHandler();
     this->OpenDoor();
 }
 
@@ -209,16 +225,24 @@ void EventHandler::WritePasswordOnDisplay(const char* data)
 
 const char* EventHandler::CreateOpenDoorMsg()
 {
-	rapidjson::StringBuffer s;
-	rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+	static rapidjson::StringBuffer s;
+    memset(&s, 0x0, sizeof(s));
 
-	writer.StartObject();
-	writer.Key("order");
-	writer.String("open");
-	writer.Key("max_open_time");
-	writer.Int(5);
-	writer.EndObject();
-    
+	rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+    try
+    {
+        writer.StartObject();
+        writer.Key("order");
+        writer.String("open");
+        writer.Key("max_open_time");
+        writer.Int(5);
+        writer.EndObject();
+    } 
+    catch (const std::exception& e)
+    {
+        ERR_LOG("{}", e.what());
+        return nullptr;
+    }    
 	return s.GetString();
 }
 

@@ -5,6 +5,7 @@
 #include <openssl/sha.h>
 #include <cstring>
 #include <ctime>
+#include <iomanip>
 
 SystemManager::SystemManager(ConfigManager& config_) : config(&config_)
 {
@@ -13,24 +14,39 @@ SystemManager::SystemManager(ConfigManager& config_) : config(&config_)
 
 bool SystemManager::PwCompare(std::vector<char> input_pw)
 {
-	std::vector<unsigned char> encryption_input_pw = EncryptionPw(reinterpret_cast<char*>(input_pw.data()));
-	if (this->IsEqual(this->GetPw(), encryption_input_pw)) 
+    if (input_pw.empty())
+    {
+        return false;
+    }
+
+    /* SHA256 PW */
+    std::string get_pw, sha256_pw;
+    if ((EncryptionSHA256(reinterpret_cast<char*>(input_pw.data()), sha256_pw) == false))
+    {
+        return false;
+    }
+
+    /* Get PW */
+    if ((this->GetPw(get_pw) == false))
+    {
+        return false;
+    }
+
+    /* Check PW */
+	if (this->IsEqual(get_pw, sha256_pw)) 
 	{
         return true;
 	}
     return false;
 }
 
-std::vector<unsigned char> SystemManager::GetPw()
+bool SystemManager::GetPw(std::string& pw)
 {
-	std::vector<unsigned char> v;
-    std::string pw = config->GetConfigVal("SYSTEM", "PW", config->str_val);
-    copy(pw.begin(), pw.end(), back_inserter(v));
-
-    return  v;
+    pw = config->GetConfigVal("SYSTEM", "PW", config->str_val);
+    return pw.empty() ?  false : true;
 }
 
-std::vector<unsigned char> SystemManager::EncryptionPw(char* pw)
+bool SystemManager::EncryptionSHA256(char* pw, std::string& hash_pw)
 {
     SHA256_CTX context;
     unsigned char hash[SHA256_DIGEST_LENGTH];
@@ -41,13 +57,14 @@ std::vector<unsigned char> SystemManager::EncryptionPw(char* pw)
     SHA256_Update(&context, (unsigned char*)salt_.c_str(), strlen(salt_.c_str()));
     SHA256_Final(hash, &context);
 
-    char hashTransform[SHA256_DIGEST_LENGTH * 2 + 1] = {0,};
+    std::stringstream hex_hash;
     for (uint8_t i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
-        snprintf(&hashTransform[i*2], SHA256_DIGEST_LENGTH * 2 + 1, "%02x", (unsigned int)hash[i]);
+        hex_hash << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(hash[i]);
     }
-    std::vector<unsigned char> encryption_pw(hashTransform, hashTransform + strlen((const char *)hashTransform));
-    return encryption_pw;
+    hash_pw = hex_hash.str();
+
+    return hash_pw.empty() ?  false : true;
 }
 
 char* SystemManager::GetLocalTime(void)
@@ -95,6 +112,6 @@ bool SystemManager::IsTimeDiff(unsigned long now, unsigned long prev, unsigned l
 
 SystemManager::~SystemManager()
 {
-    config = NULL;
+    config = nullptr;
     INFO_LOG("Delete..");
 }

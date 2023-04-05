@@ -9,6 +9,14 @@
 class KeyPad : public Utils
 {
 public:
+    enum class Data: char
+    {
+        PASSWORD = 'A',
+        CALL     = 'B',
+        CLEAR    = 'C',
+        INVALID  = 'P',
+    };
+
     KeyPad(const char* dev_path);
     std::vector<char> BuffCpy();
     void BuffCler();

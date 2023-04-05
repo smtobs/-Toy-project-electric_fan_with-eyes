@@ -48,10 +48,5 @@ private:
     void InitDisplay();
     void WritePasswordOnDisplay(const char* data);
     const char* CreateOpenDoorMsg();
-    
-    #define  PASSWORD   'A'
-    #define  CALL       'B'
-    #define  CLEAR      'C'
-    #define  NULL_DATA  0
 };
 #endif

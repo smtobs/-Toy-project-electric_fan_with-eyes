@@ -21,8 +21,8 @@ private:
     ConfigManager* config;
     std::vector<unsigned char> pw;
     
-    std::vector<unsigned char> EncryptionPw(char* pw);
-    std::vector<unsigned char> GetPw();
+    bool EncryptionSHA256(char* pw, std::string& hash_pw);
+    bool GetPw(std::string& get_pw);
 };
 
 #endif
