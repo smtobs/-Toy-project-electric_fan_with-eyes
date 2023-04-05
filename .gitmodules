@@ -1,0 +1,3 @@
+[submodule "door"]
+	path = door
+	url = https://github.com/smtobs/esp32_door
