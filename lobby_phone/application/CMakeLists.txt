@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15.2)
 project(core)
 
-find_package(Boost REQUIRED COMPONENTS thread)
+find_package(libuv REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PahoMqttCpp REQUIRED)
@@ -33,6 +33,7 @@ add_executable(
     src/mqtt_iface.cpp
     src/event_handler.cpp
     src/event_driven.cpp
+    src/event_callback.cpp
     src/image_sender.cpp
     src/config_manager.cpp
     src/utils.cpp)
@@ -43,8 +44,7 @@ target_link_libraries(
     OpenSSL::Crypto
     spdlog::spdlog
     PahoMqttCpp::paho-mqttpp3
-    Boost::thread
-    /usr/lib/arm-linux-gnueabihf/libev.so
+    uv
     yaml-cpp
     ${OpenCV_LIBS}
     #   ${CURL_LIBRARIES}
