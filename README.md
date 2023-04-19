@@ -25,7 +25,7 @@ ToDo
 - 4x4 keypad
 - WebCAM
 
-## S/W 구조 
+## 로비폰 S/W 구조 
 ![image](https://user-images.githubusercontent.com/50127167/233103795-ec4e471c-de72-4f70-af00-685b4beea3ec.png)
 
 
