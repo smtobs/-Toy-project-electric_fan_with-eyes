@@ -225,10 +225,10 @@ void EventHandler::WritePasswordOnDisplay(const char* data)
 
 const char* EventHandler::CreateOpenDoorMsg()
 {
-	static rapidjson::StringBuffer s;
+    static rapidjson::StringBuffer s;
     memset(&s, 0x0, sizeof(s));
 
-	rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     try
     {
         writer.StartObject();
@@ -243,7 +243,7 @@ const char* EventHandler::CreateOpenDoorMsg()
         ERR_LOG("{}", e.what());
         return nullptr;
     }    
-	return s.GetString();
+    return s.GetString();
 }
 
 EventHandler::~EventHandler()

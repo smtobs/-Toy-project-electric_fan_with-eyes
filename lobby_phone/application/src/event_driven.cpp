@@ -1,7 +1,6 @@
 #include "event_driven.hpp"
 
 EventDriven::EventDriven(ConfigManager& config) : is_event_loop_running(false)
-
 {
     /* Create Event handler */
     this->handle  = new EventHandler(config);
@@ -32,13 +31,12 @@ void EventDriven::StartEventLoop()
 
 void EventDriven::StopEventLoop()
 {
-	if (this->is_event_loop_running == true)
-	{
-
-    	this->is_event_loop_running = false;
-    	EventCallback::UnregisterEventCallback();
-    	uv_stop(this->event_loop);
-	}
+    if (this->is_event_loop_running == true)
+    {
+        this->is_event_loop_running = false;
+        EventCallback::UnregisterEventCallback();
+        uv_stop(this->event_loop);
+    }
 }
 
 EventDriven::~EventDriven()

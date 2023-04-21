@@ -1,6 +1,7 @@
 #include <csignal>
 #include <unistd.h>
 #include <cstdlib>
+#include <mutex>
 
 #include "event_callback.hpp"
 
@@ -15,109 +16,142 @@ namespace EventCallback
 	uv_timer_t oled_timer;
 	uv_timer_t mqtt_timer;
 
-	static constexpr uint16_t KEYPAD_EVENT = 0u;
+	static constexpr uint16_t KEYPAD_EVENT      = 0u;
 	static constexpr uint16_t TIME_UPDATE_EVENT = 1u;
-	static constexpr uint16_t MQTT_YIELD_EVENT = 2u;
+	static constexpr uint16_t MQTT_YIELD_EVENT  = 2u;
 
-static void SigCallback(uv_signal_t* handle, int signum)
-{
-	g_event->StopEventLoop();
-}
+	static constexpr int8_t   MAX_WORK_REQ  = 4;
+	uv_work_t* req[MAX_WORK_REQ];
+	std::mutex req_mutex;
 
-static void EventListener(uv_work_t* req)
-{
-	uint16_t event = *(uint16_t *) req->data;
-
-	if (!req || !g_event || !g_event->handle)
+	static void SigCallback(uv_signal_t* handle, int signum)
 	{
-		
-		goto err;
+		g_event->StopEventLoop();
 	}
 
-	switch (event)
+	static void EventListener(uv_work_t* req)
 	{
-		case KEYPAD_EVENT:
-			g_event->handle->KeypadEventHandler();
-			break;
+		uint16_t event = *(uint16_t *) req->data;
 
-		case TIME_UPDATE_EVENT:
-			g_event->handle->RenewScreenTimeHandler();
-			break;
+		if (!req || !g_event || !g_event->handle)
+		{
+			return;
+		}
 
-		case MQTT_YIELD_EVENT:
-			g_event->handle->MqttYieldEventHandler();
-			break;
+		/* Blocking Event Handler */
+		switch (event)
+		{
+			case KEYPAD_EVENT:
+				g_event->handle->KeypadEventHandler();
+				break;
 
-		default:
-			break;
+			case TIME_UPDATE_EVENT:
+				g_event->handle->RenewScreenTimeHandler();
+				break;
+
+			case MQTT_YIELD_EVENT:
+				g_event->handle->MqttYieldEventHandler();
+				break;
+
+			default:
+				break;
+		}
 	}
 
-	err:
-		delete req;
-}
+	static void AfterEventListener(uv_work_t* req, int status)
+	{
+		req->data = NULL;
+	}
 
-static void RespEventListener(uv_work_t* req, int status)
-{
-	/* Todo */
-}
+	static void KeypadTimerCallback(uv_timer_t* w)
+	{
+		EventQueue(KEYPAD_EVENT);
+	}
 
-static void KeypadTimerCallback(uv_timer_t* w)
-{
-	EventQueue(KEYPAD_EVENT);
-}
+	static void RenewOledTimeCallback(uv_timer_t* w)
+	{
+		EventQueue(TIME_UPDATE_EVENT);
+	}
 
-static void RenewOledTimeCallback(uv_timer_t* w)
-{
-	EventQueue(TIME_UPDATE_EVENT);
-}
+	static void MqttYieldCallback(uv_timer_t* w)
+	{
+		EventQueue(MQTT_YIELD_EVENT);
+	}
 
-static void MqttYieldCallback(uv_timer_t* w)
-{
-	EventQueue(MQTT_YIELD_EVENT);
-}
+	void EventQueue(uint16_t event_flag)
+	{
+		req_mutex.lock();
 
-void EventQueue(uint16_t event_flag)
-{
-	uv_work_t* req = new uv_work_t();
-	req->data = (void *)&event_flag;
-	uv_queue_work(g_event->event_loop, req, EventListener, RespEventListener);
-}
+		/* Verifying Thread Usage */
+		uint8_t index = event_flag;
+		if (req[index]->data != NULL)
+		{
+			int found;
+			for (found = (MAX_WORK_REQ - 1); found >= 0; found--)
+			{
+				if (req[found]->data == NULL)
+				{
+					index = found;
+					goto thread_found;
+				}
+			}
+			std::cout << "The number of threads available to handle requests is insufficient."<< std::endl;
+			req_mutex.unlock();
+			return;
+		}
 
-void UnregisterEventCallback()
-{
-	g_event = NULL;
+		thread_found:
+		req[index]->data = (void *)&event_flag;
+		uv_queue_work(g_event->event_loop, req[index], EventListener, AfterEventListener);
+		req_mutex.unlock();
+	}
 
-	uv_timer_stop(&keypad_timer);
-	uv_close((uv_handle_t* )&keypad_timer, NULL);
+	void UnregisterEventCallback()
+	{
+		g_event = NULL;
 
-	uv_timer_stop(&oled_timer);
-	uv_close((uv_handle_t* )&oled_timer, NULL);
+		uv_timer_stop(&keypad_timer);
+		uv_close((uv_handle_t* )&keypad_timer, NULL);
 
-	uv_timer_stop(&mqtt_timer);
-	uv_close((uv_handle_t* )&mqtt_timer, NULL);
-}
+		uv_timer_stop(&oled_timer);
+		uv_close((uv_handle_t* )&oled_timer, NULL);
 
-void RegisterEventCallback(EventDriven* event)
-{
-	g_event = event;
+		uv_timer_stop(&mqtt_timer);
+		uv_close((uv_handle_t* )&mqtt_timer, NULL);
 
-	uv_signal_init(g_event->event_loop, &sigint_handle);
-	uv_signal_init(g_event->event_loop, &sigterm_handle);
+		for (uint8_t i=0; i <MAX_WORK_REQ; i++)
+		{
+			delete req[i];
+			req[i] = NULL;
+		}
+	}
 
-	uv_signal_start(&sigint_handle, SigCallback, SIGINT);
-	uv_signal_start(&sigterm_handle, SigCallback, SIGTERM);
+	void RegisterEventCallback(EventDriven* event)
+	{
+		g_event = event;
 
-	/* Register Check Keypad Input Timer */
-	uv_timer_init(g_event->event_loop, &keypad_timer);
-	uv_timer_start(&keypad_timer, KeypadTimerCallback, 1000, 100);
+		for (uint8_t i=0; i <MAX_WORK_REQ; i++)
+		{
+			req[i] = new uv_work_t();
+			req[i]->data = NULL;
+		}
 
-	/* Register Oled Time Update Timer */
-	uv_timer_init(g_event->event_loop, &oled_timer);
-	uv_timer_start(&oled_timer, RenewOledTimeCallback, 100, 1000);
+		uv_signal_init(g_event->event_loop, &sigint_handle);
+		uv_signal_init(g_event->event_loop, &sigterm_handle);
 
-	/* Register Mqtt yileld Timer */
-	uv_timer_init(g_event->event_loop, &mqtt_timer);
-	uv_timer_start(&mqtt_timer, MqttYieldCallback, 200, 1500);
-}
+		uv_signal_start(&sigint_handle, SigCallback, SIGINT);
+		uv_signal_start(&sigterm_handle, SigCallback, SIGTERM);
+
+		/* Register Check Keypad Input Timer */
+		uv_timer_init(g_event->event_loop, &keypad_timer);
+		uv_timer_start(&keypad_timer, KeypadTimerCallback, 1000, 100);
+
+		/* Register Oled Time Update Timer */
+		uv_timer_init(g_event->event_loop, &oled_timer);
+		uv_timer_start(&oled_timer, RenewOledTimeCallback, 100, 1000);
+
+		/* Register Mqtt yileld Timer */
+		uv_timer_init(g_event->event_loop, &mqtt_timer);
+		uv_timer_start(&mqtt_timer, MqttYieldCallback, 200, 1500);
+	}
 };
-
