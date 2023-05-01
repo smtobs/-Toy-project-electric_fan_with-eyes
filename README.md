@@ -1,5 +1,6 @@
 # 출입통제시스템
 ![image](https://user-images.githubusercontent.com/50127167/235549289-0adce0da-edb8-4009-be53-fb901282e4d6.png)
+- 사용자 출입 통제를 위한 출입 통제 시스템 구현
 
 ## 개발 환경
 - 라즈베리파이4
