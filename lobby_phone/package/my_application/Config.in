@@ -1,0 +1,4 @@
+config BR2_PACKAGE_MY_APPLICATION
+	bool "My Application"
+	help
+	  my application.

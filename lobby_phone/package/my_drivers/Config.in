@@ -1,0 +1,4 @@
+config BR2_PACKAGE_MY_DRIVERS
+	bool "My Drivers"
+	help
+	  Kernel module to my drivers.
