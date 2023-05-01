@@ -4,9 +4,10 @@ ToDo
 
 ## 개발 환경
 - 라즈베리파이4
-- buildroot
+- Buildroot
 - C, C++
 - Linux
+- U-Boot
 - vscode
 - WireShark
 
