@@ -4,8 +4,9 @@ ToDo
 
 ## 개발 환경
 - 라즈베리파이4
+- buildroot
 - C, C++
-- Raspberry Pi OS
+- Linux
 - vscode
 - WireShark
 
