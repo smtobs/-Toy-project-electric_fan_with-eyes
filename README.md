@@ -31,4 +31,6 @@
 
 ## 인터폰 UI
 ![image](https://user-images.githubusercontent.com/50127167/235549330-8c7f63eb-0029-432c-89fc-ab1948b1cb80.png)
+- QT5
+- C++
 
