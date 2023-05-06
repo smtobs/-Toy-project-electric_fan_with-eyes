@@ -12,9 +12,7 @@ class Core : public Utils
 public:
     Core(int argc, char **argv) : argc_(argc), argv_(argv)
     {
-        assert(this->OptionHandler() != false);
-
-    	SetConfigPath(tt);
+        this->OptionHandler();
         config = new ConfigManager(this->GetConfigPath());
         this->ev_driven = new EventDriven(*config);
     }
