@@ -1,0 +1,20 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    echo "Starting Boot Success..."
+    fw_setenv boot_fail_count 0
+
+    boot_rootfs_partition=$(fw_printenv rootfs_partition | awk -F= '{print $2}')
+    if [ "$boot_rootfs_partition" = "/dev/mmcblk0p4" ]; then
+        echo "rpi_boot_a 1.0" > /etc/hwrevision
+    else
+        echo "rpi_boot_b 1.0" > /etc/hwrevision
+    fi
+    ;;
+    *)
+
+echo "Usage: $0 {start}"
+exit 1
+;;
+ esac

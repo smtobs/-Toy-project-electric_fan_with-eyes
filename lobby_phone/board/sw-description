@@ -1,0 +1,59 @@
+software =
+{
+        version = "0.1.0";
+   	hardware-compatibility = ["1.0"];
+
+
+	rpi_boot_a = {
+
+        			images: (
+                			{
+                        			filename = "rootfs.ext2";
+						device = "/dev/mmcblk0p3";
+						type = "raw";
+              	  			}
+				);
+
+				scripts: (
+                			{
+                    				filename = "update.sh";
+                    				type = "postinstall";
+                	 		}
+				);
+	};
+
+
+	rpi_boot_b = {
+
+        			images: (
+                			{
+                        			filename = "rootfs.ext2";
+						device = "/dev/mmcblk0p4";
+						type = "raw";
+              	  			}
+				);
+
+				scripts: (
+                			{
+                    				filename = "update.sh";
+                    				type = "postinstall";
+                	 		}
+				);
+	};
+
+
+        			images: (
+                			{
+                        			filename = "rootfs.ext2";
+						device = "/dev/null";
+						type = "noop";
+              	  			}
+				);
+
+				scripts: (
+                			{
+                    				filename = "update.sh";
+                    				type = "postinstall";
+                	 		}
+				);
+};

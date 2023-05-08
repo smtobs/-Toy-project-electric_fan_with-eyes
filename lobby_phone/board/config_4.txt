@@ -30,3 +30,5 @@ dtoverlay=krnbt=on
 dtoverlay=pwm,pin=12,func=4
 dtoverlay=spi0-1cs,cs0_spidev=disabled
 dtoverlay=spi1-1cs,cs0_spidev=disabled
+
+enable_uart=1

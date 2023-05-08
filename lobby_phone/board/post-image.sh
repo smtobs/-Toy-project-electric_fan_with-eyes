@@ -16,6 +16,14 @@ GENIMAGE_TMP="${BUILD_DIR}/genimage.tmp"
 # Gen U-Boot script
 mkimage -A arm -O linux -T script -C none -n "${START_DIR}/board/raspberrypi4/boot.scr" -d "${START_DIR}/board/raspberrypi4/boot.scr" "${BINARIES_DIR}/boot.scr.uimg"
 
+# Copy swu-pdate files
+cp ${START_DIR}/board/raspberrypi4/sw-description ${BINARIES_DIR}/
+cp ${START_DIR}/board/raspberrypi4/update.sh ${BINARIES_DIR}/
+cp ${START_DIR}/board/raspberrypi4/gen_update_img.sh ${BINARIES_DIR}/
+
+cd ${BINARIES_DIR}
+source gen_update_img.sh
+cd -
 
 trap 'rm -rf "${ROOTPATH_TMP}"' EXIT
 ROOTPATH_TMP="$(mktemp -d)"
