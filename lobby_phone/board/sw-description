@@ -16,7 +16,7 @@ software =
 
 				scripts: (
                 			{
-                    				filename = "update.sh";
+                    				filename = "update_completed.sh";
                     				type = "postinstall";
                 	 		}
 				);
@@ -35,7 +35,7 @@ software =
 
 				scripts: (
                 			{
-                    				filename = "update.sh";
+                    				filename = "update_completed.sh";
                     				type = "postinstall";
                 	 		}
 				);
@@ -52,7 +52,7 @@ software =
 
 				scripts: (
                 			{
-                    				filename = "update.sh";
+                    				filename = "update_completed.sh";
                     				type = "postinstall";
                 	 		}
 				);

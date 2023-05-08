@@ -18,7 +18,7 @@ mkimage -A arm -O linux -T script -C none -n "${START_DIR}/board/raspberrypi4/bo
 
 # Copy swu-pdate files
 cp ${START_DIR}/board/raspberrypi4/sw-description ${BINARIES_DIR}/
-cp ${START_DIR}/board/raspberrypi4/update.sh ${BINARIES_DIR}/
+cp ${START_DIR}/board/raspberrypi4/update_completed.sh ${BINARIES_DIR}/
 cp ${START_DIR}/board/raspberrypi4/gen_update_img.sh ${BINARIES_DIR}/
 
 cd ${BINARIES_DIR}
